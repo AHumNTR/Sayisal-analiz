@@ -13,28 +13,6 @@ void addElementToTheList(char ***elementsString,char *input,int *startIndex,int 
             *elementCount+=1;
             *startIndex=endIndex;
 }
-bool convertElementIntoTypes(char *elementsString,baseElement **elements,int *elementCount,bool increaseTheSizeIfSuccesfull)
-{
-    
-    if(checkAndConvertToConstantElement(elementsString,*elements+*elementCount));
-    else if(checkAndConvertToPolinominal(elementsString,*elements+*elementCount));
-    else if(checkAndConvertToExponentialElement(elementsString,*elements+*elementCount));
-    else if(checkAndConvertToMultipclationElement(elementsString,*elements+*elementCount));
-    else if(checkAndConvertToParanthesesElements(elementsString,*elements+*elementCount));
-    else return false;
-    if(increaseTheSizeIfSuccesfull){
-        *elementCount+=1;//if it didnt return it means it was succesfull and that we need to make room for more elements
-        *elements=(baseElement*)realloc(*elements,(*elementCount+1)*sizeof(baseElement));  
-    }
-    return true;
-}
-void convertAllElementsIntoTypes(char ***elementsString,int elementStringCount,baseElement **elements,int *elementCount){
-    int i;
-    for(i=0;i<elementStringCount;i++){
-        if(convertElementIntoTypes((*elementsString)[i],elements,elementCount,true));
-    }
-}
-
 void splitIntoAdditionElements(char ***elementsString,char *input,int *elementCount){
  asda32323232asdasdasd
     int lastElementIndex=0,i=0;
@@ -274,4 +252,25 @@ double getValueOfElement(baseElement *element,double x){
         return pow(getValueOfElement(temp->element,x),getValueOfElement(temp->exp,x)); 
     }
     return -1;
+}
+bool convertElementIntoTypes(char *elementsString,baseElement **elements,int *elementCount,bool increaseTheSizeIfSuccesfull)
+{
+    
+    if(checkAndConvertToConstantElement(elementsString,*elements+*elementCount));
+    else if(checkAndConvertToPolinominal(elementsString,*elements+*elementCount));
+    else if(checkAndConvertToExponentialElement(elementsString,*elements+*elementCount));
+    else if(checkAndConvertToMultipclationElement(elementsString,*elements+*elementCount));
+    else if(checkAndConvertToParanthesesElements(elementsString,*elements+*elementCount));
+    else return false;
+    if(increaseTheSizeIfSuccesfull){
+        *elementCount+=1;//if it didnt return it means it was succesfull and that we need to make room for more elements
+        *elements=(baseElement*)realloc(*elements,(*elementCount+1)*sizeof(baseElement));  
+    }
+    return true;
+}
+void convertAllElementsIntoTypes(char ***elementsString,int elementStringCount,baseElement **elements,int *elementCount){
+    int i;
+    for(i=0;i<elementStringCount;i++){
+        if(convertElementIntoTypes((*elementsString)[i],elements,elementCount,true));
+    }
 }
