@@ -36,7 +36,7 @@ void convertAllElementsIntoTypes(char ***elementsString,int elementStringCount,b
 }
 
 void splitIntoAdditionElements(char ***elementsString,char *input,int *elementCount){
- 
+ asda32323232asdasdasd
     int lastElementIndex=0,i=0;
     while(input[i]!=0 &&input[i]!='\n'){
         if((input[i]=='+' || input[i]=='-')){
