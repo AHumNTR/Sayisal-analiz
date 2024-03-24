@@ -1,9 +1,17 @@
 
 #include <stdbool.h>
-typedef enum elementType{
-constantElementType,multipclationElementType,polinominalElementType,paranthesesElementType,exponentialElementType,functionElementType
-} elementType;
 
+#define pi 3.14159265359
+#define e 2.718281828459045
+typedef enum elementType{
+constantElementType,multipclationElementType,polinominalElementType,paranthesesElementType,exponentialElementType,singleParameterFunctionElementType,dualParameterFunctionElementType
+} elementType;
+typedef enum singleParameterFunctionTypes{
+sinT,cosT,tanT,cotT,secT,cosecT,arcsecT,arccosecT,arcsinT,arccosT,arctanT,arccotT,lnT //T for type
+} singleParameterFunctionTypes;
+typedef enum dualParameterFunctionTypes{
+logT //T for type
+} dualParameterFunctionTypes;
 typedef struct baseElement{
     elementType type;
     void *ptr;
@@ -14,10 +22,19 @@ typedef struct polinominalElement
     baseElement* exp,*coefficent;
 } polinominalElement;
 
-typedef struct functionElement
+typedef struct singleParameterFunctionElement
 {
-    baseElement* inside,*coefficent;
-} polinominalElement;
+    singleParameterFunctionTypes functionType;
+    bool isNegative;
+    baseElement* parameter;
+} singleParameterFunctionElement;
+
+typedef struct dualParameterFunctionElement
+{
+    dualParameterFunctionTypes functionType;
+    bool isNegative;
+    baseElement* firstParameter,*secondParameter;
+} dualParameterFunctionElement;
 
 typedef struct paranthesesElement
 {
@@ -46,7 +63,11 @@ bool checkAndConvertToMultipclationElement(char *input,baseElement *multipclatio
 bool checkAndConvertToConstantElement(char *elementString,baseElement *constant);
 bool checkAndConvertToPolinominal(char *input, baseElement *polinom);
 bool checkAndConvertToParanthesesElements(char *input, baseElement *polinom);
-bool checkAndConvertToFunctionElements(char *input, baseElement *polinom);
-
+bool checkAndConvertToSingleParameterFunctionElement(char *input,baseElement *trigonometricElementBase);
+bool checkAndConvertToDualParameterFunctionElement(char *input, baseElement *dualParameterFunctionElementBase);
+bool checkAndConvertToExponentialElement(char *input,baseElement *expElementBase);
 
 double getValueOfElement(baseElement *element,double x);
+void freeMemoryOfElement(baseElement *element);
+
+char* substring(char* string,int start,int end);
