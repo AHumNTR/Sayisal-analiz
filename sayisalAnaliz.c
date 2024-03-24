@@ -108,7 +108,7 @@ bool checkAndConvertToPolinominal(char *input, baseElement *polinom){
     elementsString[0]=malloc(sizeof(char));
     int elementCount=0,i=0;
     double coefficent=1,exp=0;
-    baseElement tempConstant;//this might be the issue
+    baseElement tempConstant;
     bool isADivider=false,hasSign=true;
 
     splitIntoMultipclationElements(&elementsString,input,&elementCount);//split the element up into its factors
@@ -323,6 +323,7 @@ double getValueOfElement(baseElement *element,double x){
         int i=0;
         paranthesesElement *temp= (paranthesesElement*)element->ptr;//get the parantheses element as pointer
         for(i=0;i<temp->elementCount;i++){
+            baseElement *temp3=temp->elementArray+i;
             sum=sum+getValueOfElement(temp->elementArray+i,x);
         }
         return sum;
@@ -403,12 +404,9 @@ double getValueOfElement(baseElement *element,double x){
     }
     return -1;
 }
-bool convertElementIntoTypes(char *elementsString,baseElement **elements,int *elementCount,bool increaseTheSize)
+bool convertElementIntoTypes(char *elementsString,baseElement **elements,int *elementCount,bool increaseTheSizeIfSuccesfull)
 {
-     if(increaseTheSize){
-        *elementCount+=1;//if it didnt return it means it was succesfull and that we need to make room for more elements
-        *elements=(baseElement*)realloc(*elements,(*elementCount+1)*sizeof(baseElement));  
-    }
+    
     if(checkAndConvertToConstantElement(elementsString,*elements+*elementCount));
     else if(checkAndConvertToPolinominal(elementsString,*elements+*elementCount));
     else if(checkAndConvertToExponentialElement(elementsString,*elements+*elementCount));
@@ -417,7 +415,10 @@ bool convertElementIntoTypes(char *elementsString,baseElement **elements,int *el
     else if(checkAndConvertToMultipclationElement(elementsString,*elements+*elementCount));
     else if(checkAndConvertToParanthesesElements(elementsString,*elements+*elementCount));
     else return false;
-   
+    if(increaseTheSizeIfSuccesfull){
+        *elementCount+=1;//if it didnt return it means it was succesfull and that we need to make room for more elements
+        *elements=(baseElement*)realloc(*elements,(*elementCount+1)*sizeof(baseElement));  
+    }
     return true;
 }
 void convertAllElementsIntoTypes(char ***elementsString,int elementStringCount,baseElement **elements,int *elementCount){
@@ -445,10 +446,10 @@ void freeMemoryOfElement(baseElement *element){
         
         int i=0;
         paranthesesElement *temp= (paranthesesElement*)element->ptr;//get the parantheses element as pointer
-        for(i=0;i<temp->elementCount-1;i++){//last one is empty
-            freeMemoryOfElement(temp->elementArray[i].ptr);
+        for(i=0;i<temp->elementCount;i++){
+            baseElement *temp2=temp->elementArray+i;
+            freeMemoryOfElement(temp->elementArray+i);
         }
-        free(temp->elementArray);
         free(temp);
         free(element);
         return;
