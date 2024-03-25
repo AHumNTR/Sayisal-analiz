@@ -39,12 +39,14 @@ typedef struct dualParameterFunctionElement
 typedef struct paranthesesElement
 {
     int elementCount;
-    baseElement* elementArray;
+    bool isNegative;
+    baseElement** elementArray;
 } paranthesesElement;
 
 typedef struct multipclationElement{
     int elementCount;
-    baseElement* elementArray;
+    bool isNegative;
+    baseElement** elementArray;
 }multipclationElement;//stores each factor as a baseElement
 
 typedef struct exponentialElement{
@@ -52,8 +54,8 @@ typedef struct exponentialElement{
     baseElement *element;
 }exponentialElement;
 void addElementToTheList(char ***elementsString, char *input, int *startIndex, int endIndex, int *elementCount);
-bool convertElementIntoTypes(char *elementsString,baseElement **elements,int *elementCount,bool increaseTheSizeIfSuccesfull);
-void convertAllElementsIntoTypes(char ***elementsString,int elementStringCount,baseElement **elements,int *elementCount);
+bool convertElementIntoTypes(char *elementsString,baseElement *elements);
+void convertAllElementsIntoTypes(char ***elementsString,int elementStringCount,baseElement ***elements,int *elementCount);
 
 void splitIntoAdditionElements(char ***elementsString,char *input,int *elementCount);
 void splitIntoMultipclationElements(char ***elementsString,char *input,int *elementCount);
