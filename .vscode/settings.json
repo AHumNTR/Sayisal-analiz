@@ -4,7 +4,8 @@
         "stdbool.h": "c",
         "stdlib.h": "c",
         "string.h": "c",
-        "sayisalanaliz.h": "c"
+        "sayisalanaliz.h": "c",
+        "type_traits": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
