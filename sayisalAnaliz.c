@@ -54,7 +54,7 @@ int lastElementIndex=0,i=0,paranthesesDeepnes=0;//represents how many paranthese
 
 bool checkAndConvertToConstantElement(char *elementString,baseElement *constant){
     int i =0,j=0,dotsIndex=-1;
-    double temp=0;//i was using malloc here and it was not working randomly and ive spent a lot of time trying to fix it :(
+    double *temp=calloc(1,sizeof(double));//i was using malloc here and it was not working randomly and ive spent a lot of time trying to fix it :(
     bool isNegative=false,hasSign=true;
     if(elementString[0]=='-')isNegative=true;
     else if (elementString[0]!='+')hasSign=false;
@@ -67,12 +67,12 @@ bool checkAndConvertToConstantElement(char *elementString,baseElement *constant)
     }
     if(dotsIndex==-1)dotsIndex=i;
     for(j=dotsIndex+1;j<i;j++){//add whats after the dot
-        temp+= pow(10,dotsIndex-j)*(elementString[j]-'0');
+        *temp+= pow(10,dotsIndex-j)*(elementString[j]-'0');
     }
     for(j=dotsIndex-1;j>=hasSign;j--){//add whats before the dot
-        temp+= pow(10,dotsIndex-1-j)*(elementString[j]-'0');
+        *temp+= pow(10,dotsIndex-1-j)*(elementString[j]-'0');
     }
-    if(isNegative)temp=temp*-1;
+    if(isNegative)*temp=(*temp)*-1;
     //printf("%lf",*temp);
     constant->type=constantElementType;
     constant->ptr=temp;
@@ -857,7 +857,7 @@ baseElement* makeCopyOfElement(baseElement* element){
     }
     else if(element->type==singleParameterFunctionElementType){
         singleParameterFunctionElement *temp =(singleParameterFunctionElement*) element->ptr;
-        copy=createSingleParameterFunctionElementAndFill(temp->functionType,temp->isNegative,makeCopyOfElement(temp->element));
+        copy=createSingleParameterFunctionElementAndFill(temp->functionType,temp->isNegative,makeCopyOfElement(temp->parameter));
         return copy;
     }
     else if(element->type==dualParameterFunctionElementType){
