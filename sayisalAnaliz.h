@@ -85,9 +85,13 @@ bool checkAndConvertToExponentialElement(char *input,baseElement *expElementBase
 
 double getValueOfElement(baseElement *element,double x);
 baseElement* derivate(baseElement *element);
-
+baseElement* makeCopyOfElement(baseElement* element);
 
 void freeMemoryOfElement(baseElement *element);
 
 char* substring(char* string,int start,int end);
 void printElement(baseElement *element);
+
+void BisectionSearch(baseElement* element);
+void RegulaFalsi(baseElement* element);
+void NewtonRaphson(baseElement* element);

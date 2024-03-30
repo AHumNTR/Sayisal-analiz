@@ -12,14 +12,16 @@ int main(){
     while(input[0]=='('){
         printf("Please enter the function\n");
         fgets(input,1000,stdin);
-        printf("Please enter the value of x\n");
+        checkAndConvertToParanthesesElements(input,elements);
+        NewtonRaphson(elements);
+        /*printf("Please enter the value of x\n");
         scanf("%lf",&x);
         checkAndConvertToParanthesesElements(input,elements);
         printf("%lf\n",getValueOfElement(elements,x));
         derivitive=derivate(elements);
         printf("derivitive =%lf\n",getValueOfElement(derivitive,x));
         printElement(derivitive);
-        printf("\n");
+        printf("\n");*/
         freeMemoryOfElement(elements);
         elements=malloc(sizeof(baseElement));
         elementCount=0,constantCount=0;

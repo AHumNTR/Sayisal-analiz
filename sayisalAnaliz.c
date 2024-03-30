@@ -816,6 +816,56 @@ baseElement* createParanthesesElement(int elementCount,bool isNegative){
     tempParanthesesElement->elementArray=calloc(elementCount,sizeof(baseElement*));
     return tempParanthesesBaseElement;
 }
+baseElement* makeCopyOfElement(baseElement* element){
+    baseElement* copy;
+    if(element->type==constantElementType)
+    {
+        copy =createConstantElement(getValueOfElement(element,0));
+        return copy;
+    }
+    else if(element->type==polinominalElementType)
+    {
+        polinominalElement *temp =(polinominalElement*) element->ptr;
+        copy=createPolinominalElementAndFill(createConstantElement(getValueOfElement(temp->coefficent,0)),createConstantElement(getValueOfElement(temp->exp,0)));
+        return copy;
+    }
+    else if(element->type==paranthesesElementType){
+        
+        int i=0;
+        paranthesesElement *temp= (paranthesesElement*)element->ptr;//get the parantheses element as pointer
+        copy=createParanthesesElement(temp->elementCount,temp->isNegative);
+        paranthesesElement *temp2= (paranthesesElement*)copy->ptr;
+        for(i=0;i<temp->elementCount;i++){
+            temp2->elementArray[i]=makeCopyOfElement(temp->elementArray[i]);
+        }
+        return copy;
+    }
+    else if (element->type==multipclationElementType){
+        int i=0;
+        multipclationElement *temp= (multipclationElement*)element->ptr;//get the parantheses element as pointer
+        copy=createMultipclationElement(temp->elementCount,temp->isNegative);
+        multipclationElement *temp2= (multipclationElement*)copy->ptr;
+        for(i=0;i<temp->elementCount;i++){
+            temp2->elementArray[i]=makeCopyOfElement(temp->elementArray[i]);
+        }
+        return copy;
+    }
+    else if(element->type==exponentialElementType){
+        exponentialElement *temp =(exponentialElement*) element->ptr;
+        copy=createExponentialElementAndFill(temp->isNegative,makeCopyOfElement(temp->element),makeCopyOfElement(temp->exp));
+        return copy;
+    }
+    else if(element->type==singleParameterFunctionElementType){
+        singleParameterFunctionElement *temp =(singleParameterFunctionElement*) element->ptr;
+        copy=createSingleParameterFunctionElementAndFill(temp->functionType,temp->isNegative,makeCopyOfElement(temp->element));
+        return copy;
+    }
+    else if(element->type==dualParameterFunctionElementType){
+        dualParameterFunctionElement *temp =(dualParameterFunctionElement*) element->ptr;
+        copy=createDualParameterFunctionElementAndFill(temp->functionType,temp->isNegative,makeCopyOfElement(temp->firstParameter),makeCopyOfElement(temp->secondParameter));
+        return copy;
+    }
+}
 void freeMemoryOfElement(baseElement *element){
     if(element->type==constantElementType)
     {
@@ -957,14 +1007,68 @@ void printElement(baseElement *element){
 
 
 void BisectionSearch(baseElement* element){
-    int a,b,ep;
+    double a,b,ep;
+    int i=0;
     printf("a ve b noktalarini girin\n");
-    scanf("%d %d",&a,&b);
+    scanf("%lf %lf",&a,&b);
     printf("epsilon degerini girin\n");
-    scanf("%d",&ep);
+    scanf("%lf",&ep);
     if(getValueOfElement(element,a)<0&&getValueOfElement(element,b)>0){
-        while(abs(getValueOfElement(element,a))-ep>0&&abs(getValueOfElement(element,b))-ep>0){
-            
+        while(fabs(getValueOfElement(element,a))-ep>0&&fabs(getValueOfElement(element,b))-ep>0){
+            printf("iteration %d\na=%lf f(a)=%lf\nb=%lf f(b)=%lf\n",i,a,getValueOfElement(element,a),b,getValueOfElement(element,b));
+            if(getValueOfElement(element,(a+b)/2)>0)b=(a+b)/2;
+            else a=(a+b)/2;
+            i++;
         }
     }
+    else if(getValueOfElement(element,a)>0&&getValueOfElement(element,b)<0){
+        while(fabs(getValueOfElement(element,a))-ep>0&&fabs(getValueOfElement(element,b))-ep>0){
+            printf("iteration %d\na=%lf f(a)=%lf\nb=%lf f(b)=%lf\n",i,a,getValueOfElement(element,a),b,getValueOfElement(element,b));
+            if(getValueOfElement(element,(a+b)/2)>0)a=(a+b)/2;
+            else b=(a+b)/2;
+            i++;
+        }
+    }
+    printf("iteration %d\na=%lf f(a)=%lf\nb=%lf f(b)=%lf\n",i,a,getValueOfElement(element,a),b,getValueOfElement(element,b));
+}
+void RegulaFalsi(baseElement* element){
+    double xc,xp,ep,temp;//x current and x previous
+    double fxc,fxp;
+    int i=0;
+    printf("Ilk iki x degerini girin\n");
+    scanf("%lf %lf",&xc,&xp);
+    printf("epsilon degerini girin\n");
+    scanf("%lf",&ep);
+    fxc=getValueOfElement(element,xc);
+    fxp=getValueOfElement(element,xp);
+    while(fabs(fxc)-ep>0){
+        printf("iteration %d\ncurrent x=%lf current f(x)=%lf\nprevious x=%lf previous f(x)=%lf\n\n",i,xc,fxc,xp,fxp);
+        temp=xc;
+        xc=xc-((fxc*(xp-xc))/(fxp-fxc));
+        xp=temp;
+        fxc=getValueOfElement(element,xc);
+        fxp=getValueOfElement(element,xp);
+        i++;
+    }
+    printf("iteration %d\ncurrent x=%lf current f(x)=%lf\nprevious x=%lf previous f(x)=%lf\n",i,xc,fxc,xp,fxp);
+}
+void NewtonRaphson(baseElement* element){
+    baseElement *derivative= derivate(element);
+    double x,ep,temp;//x current and x previous
+    double fx,fdx;
+    int i=0;
+    printf("Ilk x degerini girin\n");
+    scanf("%lf",&x);
+    printf("epsilon degerini girin\n");
+    scanf("%lf",&ep);
+    fx=getValueOfElement(element,x);
+    fdx=getValueOfElement(derivative,x);
+    while(fabs(fx)-ep>0){
+        printf("iteration %d\ncurrent x=%lf current f(x)=%lf\nprevious x=%lf previous f(x)=%lf\n\n",i,x,fx);
+        x=x-fx/fdx;
+        fx=getValueOfElement(element,x);
+        fdx=getValueOfElement(derivative,x);
+        i++;
+    }
+    printf("iteration %d\ncurrent x=%lf current f(x)=%lf\nprevious x=%lf previous f(x)=%lf\n",i,x,fx);
 }
