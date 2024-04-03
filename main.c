@@ -5,12 +5,11 @@
 
 int main(){
     char input[1000],**elementsChar=(char**)malloc(0);
-    baseElement *elements;//=malloc(sizeof(baseElement)),*derivitive;
+    baseElement *elements=malloc(sizeof(baseElement)),*derivitive;//=malloc(sizeof(baseElement)),*derivitive;
     int elementCount=0,constantCount=0,c=0;
     double x=0;
     input[0]='(';
-    elements=readAndCreateMatrix(4,4);
-    printf("%lf",findDeterminentOfMatrix(elements));
+    GaussSeidelIterationMethod();
     /*while(input[0]=='('){
         printf("Please enter the function\n");
         fgets(input,1000,stdin);

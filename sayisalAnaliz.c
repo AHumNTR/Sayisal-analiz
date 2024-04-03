@@ -1399,34 +1399,46 @@ void numericalDerivative(baseElement *element)
 baseElement *findTheCofactorMatrix(baseElement *element){
     int i,j;
     matrixElement *tempMainMatrix=element->ptr;
-    baseElement *cofactorMatrixBaseElement=createMatrixElementWithAllElementsSetToZero(tempMainMatrix->n,tempMainMatrix->m);
+    baseElement *cofactorMatrixBaseElement=createMatrixElementWithAllElementsSetToZero(tempMainMatrix->n,tempMainMatrix->m),*tempSubMatrix;
     matrixElement* tempCofactorMatrix=cofactorMatrixBaseElement->ptr;
     for(i=0;i<tempCofactorMatrix->n;i++){
         for(j=0;j<tempCofactorMatrix->m;j++){
-
+            tempSubMatrix=getSubMatrix(element,i,j);
+            setValueOfConstantElement(tempCofactorMatrix->elementMatrix[i][j],((i+j)%2==0? 1:-1)*findDeterminentOfMatrix(tempSubMatrix));
+            freeMemoryOfElement(tempSubMatrix);
         }
     }
+    return cofactorMatrixBaseElement;
+}
+baseElement* getSubMatrix(baseElement* matrix,int iEliminate,int jEliminate){
+    int iSub=0,iMain=0,jSub=0,jMain=0;
+    matrixElement *temp=matrix->ptr;
+    baseElement *subMatrixBaseElement= createMatrixElementWithAllElementsSetToZero(temp->n-1,temp->m-1);//make a new sub matrix that is smaller by 1 on each axis
+    matrixElement *subMatrix=subMatrixBaseElement->ptr;
+    for(iMain=0;iMain<temp->n;iMain++){
+        if(iMain!=iEliminate){
+            for(jMain=0;jMain<temp->m;jMain++){
+                if(jMain!=jEliminate){
+                    setValueOfConstantElement(subMatrix->elementMatrix[iSub][jSub],getValueOfElement(temp->elementMatrix[iMain][jMain],0));//eliminate the row and column we are at and copy the rest to the new sub matrix
+                    jSub++;
+                }
+            }
+            jSub=0;
+            iSub++;
+        }
+    }
+    return subMatrixBaseElement;
 }
 double findDeterminentOfMatrix(baseElement *element){
     if(element->type!=matrixElementType)return getValueOfElement(element,0);//act as if it was a 1x1 matrix
     matrixElement *temp=element->ptr;
     if(temp->m==2&&temp->n==2)return getValueOfElement(temp->elementMatrix[0][0],0)*getValueOfElement(temp->elementMatrix[1][1],0)-getValueOfElement(temp->elementMatrix[1][0],0)*getValueOfElement(temp->elementMatrix[0][1],0);//return the value if its 2x2
-    int iDet,iSub=0,iMain=0,jSub;
+    int iDet;
     double det=0;
     for(iDet=0;iDet<temp->n;iDet++){
-        baseElement *subMatrixBaseElement= createMatrixElementWithAllElementsSetToZero(temp->n-1,temp->m-1);//make a new sub matrix that is smaller by 1 on each axis
-        matrixElement *subMatrix=subMatrixBaseElement->ptr;
-        for(iMain=0;iMain<temp->n;iMain++){
-            if(iMain!=iDet){
-                for(jSub=0;jSub<temp->m-1;jSub++){
-                    setValueOfConstantElement(subMatrix->elementMatrix[iSub][jSub],getValueOfElement(temp->elementMatrix[iMain][jSub+1],0));//eliminate the row and column we are at and copy the rest to the new sub matrix
-                }
-                iSub++;
-            }
-        }
-        iSub=0;
+        baseElement *subMatrixBaseElement=getSubMatrix(element,iDet,0);//make a sub matrix
         det+=(iDet%2==0 ? 1:-1)*findDeterminentOfMatrix(subMatrixBaseElement)*getValueOfElement(temp->elementMatrix[iDet][0],0);//calculate determinant with ne new sub matrix
-        freeMemoryOfElement(subMatrixBaseElement);
+        freeMemoryOfElement(subMatrixBaseElement);//free the sub matrix
     }
     return det;
 }
@@ -1441,7 +1453,128 @@ baseElement* readAndCreateMatrix(int n,int m){//this could be improved to read v
     }
     return matrixBaseElement;
 }
-baseElement* reverseMatrix(baseElement *element)
+baseElement* getTranspose(baseElement *matrix){
+    matrixElement *tempMatrix=matrix->ptr;
+    baseElement *transposeMatrixBaseElement=createMatrixElementWithAllElementsSetToZero(tempMatrix->m,tempMatrix->n);
+    matrixElement *tempTransposeMatrix=transposeMatrixBaseElement->ptr;
+    int i=0,j=0;
+    for(i=0;i<tempTransposeMatrix->n;i++){
+        for(j=0;j<tempTransposeMatrix->m;j++){
+            setValueOfConstantElement(tempTransposeMatrix->elementMatrix[i][j],getValueOfElement(tempMatrix->elementMatrix[j][i],0));
+        }
+    }
+    return transposeMatrixBaseElement;
+}
+baseElement* getInverseOFAMatrix(baseElement *matrix)
 {
-
+    baseElement *cofactor=findTheCofactorMatrix(matrix);
+    baseElement *transposeBaseElement=getTranspose(cofactor);
+    matrixElement *transposeTemp=transposeBaseElement->ptr;
+    double det=findDeterminentOfMatrix(matrix);
+    int i;
+    for(i=0;i<transposeTemp->n;i++){
+        multiplyARowWithAConstant(transposeBaseElement,i,1/det);
+    }
+    freeMemoryOfElement(cofactor);
+    return transposeBaseElement;
+}
+void addARowToAnother(baseElement *matrixBase,int source,int dest,double coefficent){
+    matrixElement *matrix=matrixBase->ptr;
+    int j=0;
+    for(j=0;j<matrix->m;j++){
+        setValueOfConstantElement(matrix->elementMatrix[dest][j],getValueOfElement(matrix->elementMatrix[dest][j],0)+getValueOfElement(matrix->elementMatrix[source][j],0)*coefficent);
+    }
+}
+void multiplyARowWithAConstant(baseElement *matrixBase,int row,double coefficent){
+    matrixElement *matrix=matrixBase->ptr;
+    int j=0;
+    for(j=0;j<matrix->m;j++){
+        setValueOfConstantElement(matrix->elementMatrix[row][j],getValueOfElement(matrix->elementMatrix[row][j],0)*coefficent);
+    }
+}
+void swapRows(baseElement *matrixBase, int firstRow,int secondRow){
+    matrixElement *matrix=matrixBase->ptr;
+    baseElement **temp=matrix->elementMatrix[firstRow];
+    matrix->elementMatrix[firstRow]=matrix->elementMatrix[secondRow];
+    matrix->elementMatrix[secondRow]=temp;
+}
+void gaussEliminationMethod(){
+    int n,m,i,j;
+    double tempCofactor,tempAnchorValue;
+    printf("Matrisin n ve m degerlerini girin\n");
+    scanf("%d %d",&n,&m);
+    printf("Matrisi girin");
+    baseElement *matrixBase=readAndCreateMatrix(n,m);
+    baseElement *inverseMatrixBase=createMatrixElementWithAllElementsSetToZero(n,m);//instead of making the matrix bigger make a difference matrix for inverse since it is easier that way
+    matrixElement *matrix=matrixBase->ptr,*inverseMatrix=inverseMatrixBase->ptr;
+    for(i=0;i<n;i++)setValueOfConstantElement(inverseMatrix->elementMatrix[i][i],1);
+    for(i=0;i<n;i++){
+        tempCofactor=1/getValueOfElement(matrix->elementMatrix[i][i],0);//after multiplying the value changes so i have to use some temp values
+        multiplyARowWithAConstant(matrixBase,i,tempCofactor);
+        multiplyARowWithAConstant(inverseMatrixBase,i,tempCofactor);
+        for(j=0;j<m;j++){
+            if(j!=i) {
+                tempAnchorValue=-1*getValueOfElement(matrix->elementMatrix[j][i],0);//same thing with the anchor value
+                addARowToAnother(matrixBase,i,j,tempAnchorValue);
+                addARowToAnother(inverseMatrixBase,i,j,tempAnchorValue);
+            }
+            
+        }
+        printElement(matrixBase);
+        printf("\n");
+        printElement(inverseMatrixBase);
+        printf("\n");
+    }
+    
+    freeMemoryOfElement(matrixBase);
+    freeMemoryOfElement(inverseMatrixBase);
+}
+void GaussSeidelIterationMethod(){
+    int n,m,i,j,iterationNumber=0,k;
+    double tempCofactor,tempAnchorValue,epsilon,sum;
+    bool isFinished=false;
+    printf("Epsilon degerini girin\n");
+    scanf("%lf",&epsilon);
+    printf("Katsayi matrisinin n ve m degerlerini girin\n");
+    scanf("%d %d",&n,&m);
+    printf("Matrisi girin\n");
+    baseElement *coefficentMatrixBase=readAndCreateMatrix(n,m);
+    printf("Sabit sayilar matrisini girin\n");
+    baseElement *constantsMatrixBase=readAndCreateMatrix(m,1);
+    matrixElement *constantMatrix=constantsMatrixBase->ptr,*coefficentMatrix=coefficentMatrixBase->ptr;
+    double *xValues=calloc(m,sizeof(double));
+    printf("Degiskenlerin baslangic degerlerini girin\n");
+    for(i=0;i<n;i++)scanf("%lf",xValues+i);
+    double max=0;
+    int maxIndex=0;
+    for(j=0;j<n;j++){//make the diagonal multipclation the biggest it can be
+        for(i=0;i<m;i++){
+            if(fabs(getValueOfElement(coefficentMatrix->elementMatrix[i][j],0))>max)
+            {
+                max=fabs(getValueOfElement(coefficentMatrix->elementMatrix[i][j],0));
+                maxIndex=i;
+            }
+        }
+        swapRows(coefficentMatrixBase,j,maxIndex);
+        max=0;
+    }
+   printElement(coefficentMatrixBase);
+    while(!isFinished){
+        isFinished=true;
+        for(i=0;i<n;i++){
+            sum=getValueOfElement(constantMatrix->elementMatrix[i][0],0);
+            for(j=0;j<m;j++){
+                if(j!=i)sum-=getValueOfElement(coefficentMatrix->elementMatrix[i][j],0)*xValues[j];//get the sum division will be done when setting the variables value
+            }
+            if(fabs(xValues[i]-sum/getValueOfElement(coefficentMatrix->elementMatrix[i][i],0))>epsilon)isFinished=false;//if it doesnt satisfie for 1 element continue with iterating
+            xValues[i]=sum/getValueOfElement(coefficentMatrix->elementMatrix[i][i],0);//set the variables value
+            sum =0;
+        }
+        printf("Iterasyon %d\n",iterationNumber);
+        for(k=0;k<m;k++)printf("%lf ",xValues[k]);
+        printf("\n\n");
+        iterationNumber++;
+    }
+    printf("Degiskenlerin son degerleri\n");
+    for(i=0 ;i<m;i++)printf("x%d = %lf\n",i,xValues[i]);
 }

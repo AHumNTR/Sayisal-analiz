@@ -107,5 +107,18 @@ void NewtonRaphson(baseElement* element);
 void Trapes(baseElement* element);
 void Simpson(baseElement * element);
 void numericalDerivative(baseElement* element);
-double findDeterminentOfMatrix(baseElement *element);
+
+
 baseElement* readAndCreateMatrix(int n,int m);
+baseElement* getSubMatrix(baseElement* matrix,int iEliminate,int jEliminate);
+baseElement *findTheCofactorMatrix(baseElement *element);
+baseElement* getTranspose(baseElement *matrix);
+baseElement* getInverseOFAMatrix(baseElement *matrix);
+double findDeterminentOfMatrix(baseElement *element);
+
+void swapRows(baseElement *matrixBase, int firstRow,int secondRow);
+void multiplyARowWithAConstant(baseElement *matrixBase,int row,double coefficent);
+void addARowToAnother(baseElement *matrixBase,int source,int dest,double coefficent);
+
+void gaussEliminationMethod();
+void GaussSeidelIterationMethod();
