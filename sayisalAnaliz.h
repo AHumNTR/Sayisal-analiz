@@ -4,7 +4,7 @@
 #define pi 3.14159265359
 #define e 2.718281828459045
 typedef enum elementType{
-constantElementType,multipclationElementType,polinominalElementType,paranthesesElementType,exponentialElementType,singleParameterFunctionElementType,dualParameterFunctionElementType
+constantElementType,multipclationElementType,polinominalElementType,paranthesesElementType,exponentialElementType,singleParameterFunctionElementType,dualParameterFunctionElementType,matrixElementType
 } elementType;
 typedef enum singleParameterFunctionTypes{
 sinT,cosT,tanT,cotT,secT,cosecT,arcsinT,arccosT,arcsecT,arccosecT,arctanT,arccotT,lnT,sinhT,coshT //T for type
@@ -53,8 +53,13 @@ typedef struct exponentialElement{
     baseElement *element;
     bool isNegative;
 }exponentialElement;
-
+typedef struct matrixElement{
+    baseElement ***elementMatrix;
+    int n,m;
+}matrixElement;
 baseElement* createConstantElement(double value);
+void setValueOfConstantElement(baseElement *constant,double value);
+
 baseElement* createPolinominalElementAndFill(baseElement* coefficent,baseElement* exp);
 
 baseElement* createExponentialElement(bool isNegative);
@@ -64,8 +69,12 @@ baseElement* createMultipclationElement(int elementCount,bool isNegative);
 
 baseElement* createParanthesesElement(int elementCount,bool isNegative);
 
+
 baseElement* createSingleParameterFunctionElement(singleParameterFunctionTypes type,bool isNegative);
 baseElement* createSingleParameterFunctionElementAndFill(singleParameterFunctionTypes type,bool isNegative,baseElement* parameter);
+
+baseElement* createMatrixElementWithAllElementsSetToZero(int n, int m);
+
 
 void addElementToTheList(char ***elementsString, char *input, int *startIndex, int endIndex, int *elementCount);
 bool convertElementIntoTypes(char *elementsString,baseElement *elements);
@@ -95,3 +104,8 @@ void printElement(baseElement *element);
 void BisectionSearch(baseElement* element);
 void RegulaFalsi(baseElement* element);
 void NewtonRaphson(baseElement* element);
+void Trapes(baseElement* element);
+void Simpson(baseElement * element);
+void numericalDerivative(baseElement* element);
+double findDeterminentOfMatrix(baseElement *element);
+baseElement* readAndCreateMatrix(int n,int m);
