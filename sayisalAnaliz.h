@@ -75,7 +75,7 @@ baseElement* createSingleParameterFunctionElementAndFill(singleParameterFunction
 
 baseElement* createMatrixElementWithAllElementsSetToZero(int n, int m);
 
-
+baseElement *readFunction();
 void addElementToTheList(char ***elementsString, char *input, int *startIndex, int endIndex, int *elementCount);
 bool convertElementIntoTypes(char *elementsString,baseElement *elements);
 void convertAllElementsIntoTypes(char ***elementsString,int elementStringCount,baseElement ***elements,int *elementCount);
@@ -100,14 +100,15 @@ void freeMemoryOfElement(baseElement *element);
 
 char* substring(char* string,int start,int end);
 void printElement(baseElement *element);
+int factorial(int value);
 
-void BisectionSearch(baseElement* element);
-void RegulaFalsi(baseElement* element);
-void NewtonRaphson(baseElement* element);
-void Trapes(baseElement* element);
-void Simpson(baseElement * element);
-void numericalDerivative(baseElement* element);
-
+double BisectionSearch(baseElement *element,double aStart,double bStart,double ep);
+double RegulaFalsi(baseElement *element,double xcStart,double xpStart,double ep);
+double NewtonRaphson(baseElement *element,double xStart,double ep);
+double Trapes(baseElement *element,double xSStart, double xEStart, double h);
+double Simpson(baseElement *element,double xSStart,double xEStart,double h,int mode);
+double  numericalDerivative(baseElement *element,double x,double h,int mode);
+void gregoryNewtonEnterpolation();
 
 baseElement* readAndCreateMatrix(int n,int m);
 baseElement* getSubMatrix(baseElement* matrix,int iEliminate,int jEliminate);
@@ -120,5 +121,5 @@ void swapRows(baseElement *matrixBase, int firstRow,int secondRow);
 void multiplyARowWithAConstant(baseElement *matrixBase,int row,double coefficent);
 void addARowToAnother(baseElement *matrixBase,int source,int dest,double coefficent);
 
-void gaussEliminationMethod();
-void GaussSeidelIterationMethod();
+baseElement* gaussEliminationMethod(baseElement *matrixBase);
+void GaussSeidelIterationMethod(baseElement *coefficentMatrixBase,baseElement *constantMatrixBase,double *xValues,double epsilon);

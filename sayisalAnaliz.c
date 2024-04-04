@@ -4,7 +4,15 @@
 #include <stdbool.h>
 #include <math.h>
 #include "sayisalAnaliz.h"
+baseElement *readFunction(){
+    printf("Lutfen fonksiyonu girin\n");
+    char input[1000];
+    fgets(input,1000,stdin);
+    baseElement *elements=malloc(sizeof(baseElement));
+    checkAndConvertToParanthesesElements(input,elements);
+    return elements;
 
+}
 void addElementToTheList(char ***elementsString, char *input, int *startIndex, int endIndex, int *elementCount)
 {
     *elementsString = (char **)realloc(*elementsString, (*elementCount + 1) * sizeof(char *));
@@ -537,7 +545,7 @@ double getValueOfElement(baseElement *element, double x)
             double temp1 = getValueOfElement(temp->parameter, x);
             if (temp1 < 0)
                 printf("ln parameter out of range using absolute instead\n");
-            value = log(abs(getValueOfElement(temp->parameter, x))) / log(e);
+            value = log(fabs(getValueOfElement(temp->parameter, x))) / log(e);
             break;
 
         default:
@@ -1232,15 +1240,19 @@ void printElement(baseElement *element)
         }
     }
 }
+int factorial(int value){
+    int factorial=1;
+    while(value){
+        factorial=factorial*value;
+        value--;
+    }
+    return factorial;
+}
 
-void BisectionSearch(baseElement *element)
+double BisectionSearch(baseElement *element,double aStart,double bStart,double ep)
 {
-    double a, b, ep;
+    double a=aStart, b=bStart;
     int i = 0;
-    printf("a ve b noktalarini girin\n");
-    scanf("%lf %lf", &a, &b);
-    printf("epsilon degerini girin\n");
-    scanf("%lf", &ep);
     if (getValueOfElement(element, a) < 0 && getValueOfElement(element, b) > 0)
     {
         while (fabs(getValueOfElement(element, a)) - ep > 0 && fabs(getValueOfElement(element, b)) - ep > 0)
@@ -1265,17 +1277,16 @@ void BisectionSearch(baseElement *element)
             i++;
         }
     }
+    else printf("Arada bulunabilecek bir kok yoktur");
     printf("iteration %d\na=%lf f(a)=%lf\nb=%lf f(b)=%lf\n", i, a, getValueOfElement(element, a), b, getValueOfElement(element, b));
+    return a;
 }
-void RegulaFalsi(baseElement *element)
+double RegulaFalsi(baseElement *element,double xcStart,double xpStart,double ep)
 {
-    double xc, xp, ep, temp; // x current and x previous
+    double xc=xcStart, xp=xpStart, temp; // x current and x previous
     double fxc, fxp;
     int i = 0;
-    printf("Ilk iki x degerini girin\n");
-    scanf("%lf %lf", &xc, &xp);
-    printf("epsilon degerini girin\n");
-    scanf("%lf", &ep);
+    
     fxc = getValueOfElement(element, xc);
     fxp = getValueOfElement(element, xp);
     while (fabs(fxc) - ep > 0)
@@ -1289,17 +1300,18 @@ void RegulaFalsi(baseElement *element)
         i++;
     }
     printf("iteration %d\ncurrent x=%lf current f(x)=%lf\nprevious x=%lf previous f(x)=%lf\n", i, xc, fxc, xp, fxp);
+    return xc;
 }
-void NewtonRaphson(baseElement *element)
+double NewtonRaphson(baseElement *element,double xStart,double ep)
 {
     baseElement *derivative = derivate(element);
-    double x, ep, temp; // x current and x previous
+    double x=xStart, temp; // x current and x previous
     double fx, fdx;
     int i = 0;
-    printf("Ilk x degerini girin\n");
-    scanf("%lf", &x);
-    printf("epsilon degerini girin\n");
-    scanf("%lf", &ep);
+    //printf("Ilk x degerini girin\n");
+    //scanf("%lf", &x);
+    //printf("epsilon degerini girin\n");
+    //scanf("%lf", &ep);
     fx = getValueOfElement(element, x);
     fdx = getValueOfElement(derivative, x);
     while (fabs(fx) - ep > 0)
@@ -1311,33 +1323,25 @@ void NewtonRaphson(baseElement *element)
         i++;
     }
     printf("iteration %d\ncurrent x=%lf current f(x)=%lf\nprevious x=%lf previous f(x)=%lf\n", i, x, fx);
+    freeMemoryOfElement(derivative);
+    return x;
 }
-void Trapes(baseElement *element)
+double Trapes(baseElement *element,double xSStart, double xEStart, double h)
 {
-    double xS, xE, h, sum; // x Start , x End
+    double xS=xSStart, xE=xEStart, sum; // x Start , x End
     int i = 0;
-    printf("Ilk ve son x degerlerini girin\n");
-    scanf("%lf %lf", &xS, &xE);
-    printf("H degerini girin\n");
-    scanf("%lf", &h);
+    
     for (i = 0; i < (xE - xS) / h; i++)
     {
         sum = sum + h * getValueOfElement(element, xS + h * i);
     }
     sum = sum - (getValueOfElement(element, xS) + getValueOfElement(element, xE)) * h / 2;
-    printf("Sum=%lf\n", sum);
+    return sum;
 }
-void Simpson(baseElement *element)
+double Simpson(baseElement *element,double xSStart,double xEStart,double h,int mode)
 {
-    double xS, xE, h, sum = 0; // x Start , x End
+    double xS=xSStart, xE=xEStart, sum = 0; // x Start , x End
     int i = 0;
-    int mode = 1;
-    printf("Kullanmak istediginiz metodu secin simpson 1/3 icin 0 simpson 3/8 icin 1 yazin\n");
-    scanf("%d", &mode);
-    printf("Ilk ve son x degerlerini girin\n");
-    scanf("%lf %lf", &xS, &xE);
-    printf("H degerini girin\n");
-    scanf("%lf", &h);
     if (mode == 0)
     {
         for (i = 1; i < (xE - xS) / h; i++)
@@ -1359,43 +1363,73 @@ void Simpson(baseElement *element)
         }
         sum = sum + (getValueOfElement(element, xS) + getValueOfElement(element, xE)) * h * (3 / 8);
     }
-
-    printf("Sum=%lf\n", sum);
+    return sum;
 }
-void numericalDerivative(baseElement *element)
+double  numericalDerivative(baseElement *element,double x,double h,int mode)
 {
-    int mode;
-    double h, x, numericalDerivative, analiticalDerivative;
-    printf("Kullanmak istediginiz metodu secin\n-1: Geri Farklar\n0 Merkezi Farklar\n1 Ileri farklar\n");
-    scanf("%d", &mode);
-    printf("X degerini girin\n");
-    scanf("%lf", &x);
-    printf("H degerini girin\n");
-    scanf("%lf", &h);
-    baseElement *derivative = derivate(element); // there is no need for it i am doing this just cause i made the derivation method already
-    printf("Fonksiyonun analitik turevi=");
-    printElement(derivative);
-    analiticalDerivative = getValueOfElement(derivative, x);
-    printf("\nFonksiyonun analitik turevinin x = %lf deki degeri = %lf", x, analiticalDerivative);
+    double numericalDerivativeValue;
     if (mode == -1)
     {
-        numericalDerivative = (getValueOfElement(element, x) - getValueOfElement(element, x - h)) / h;
-        printf("\nFonksiyonun geri farklar ile sayisal turevinin x = %lf deki degeri = %lf\n", x, numericalDerivative);
-        printf("Fonksiyonun geri farklar ile turevinin x = %lf deki mutlak hata = %lf\n", x, fabs(numericalDerivative - analiticalDerivative));
+        numericalDerivativeValue = (getValueOfElement(element, x) - getValueOfElement(element, x - h)) / h;
     }
     if (mode == 0)
     {
-        numericalDerivative = (getValueOfElement(element, x + h) - getValueOfElement(element, x - h)) / (2 * h);
-        printf("\nFonksiyonun merkezi farklar ile sayisal turevinin x = %lf deki degeri = %lf\n", x, numericalDerivative);
-        printf("Fonksiyonun merkezi farklar ile turevinin x = %lf deki mutlak hata = %lf\n", x, fabs(numericalDerivative - analiticalDerivative));
+        numericalDerivativeValue = (getValueOfElement(element, x + h) - getValueOfElement(element, x - h)) / (2 * h);
     }
     if (mode == 1)
     {
-        numericalDerivative = (getValueOfElement(element, x + h) - getValueOfElement(element, x)) / h;
-        printf("\nFonksiyonun ileri farklar ile sayisal turevinin x = %lf deki degeri = %lf\n", x, numericalDerivative);
-        printf("Fonksiyonun ileri farklar ile turevinin x = %lf deki mutlak hata = %lf\n", x, fabs(numericalDerivative - analiticalDerivative));
+        numericalDerivativeValue = (getValueOfElement(element, x + h) - getValueOfElement(element, x)) / h;
     }
+    return numericalDerivativeValue;
 }
+void gregoryNewtonEnterpolation(){
+    int n,i,j;
+    printf("Nokta sayisini giriniz\n");
+    scanf("%d",&n);
+    baseElement *differencesTableMatrixBaseElement=createMatrixElementWithAllElementsSetToZero(n,n);
+    matrixElement *differencesTableMatrix=differencesTableMatrixBaseElement->ptr;
+    double xArray[n],h,input;
+    printf("x degerini ve karsilik gelen f(x) degerini girin\n");
+    for(i=0;i<n;i++){
+        scanf("%lf %lf",xArray+i,(double*)differencesTableMatrix->elementMatrix[i][0]->ptr);
+    }
+    for(j=1;j<n;j++){//how this is set up would allow me to acces nth differensial of xi by using [i][n]
+        for(i=0;i<n-j;i++){
+           setValueOfConstantElement(differencesTableMatrix->elementMatrix[i][j],getValueOfElement(differencesTableMatrix->elementMatrix[i+1][j-1],0)-getValueOfElement(differencesTableMatrix->elementMatrix[i][j-1],0));
+        }
+    }
+    printElement(differencesTableMatrixBaseElement);
+    printf("\n");
+    h=xArray[1]-xArray[0];
+    baseElement *elementBase=createParanthesesElement(n,false);//make a parantheses element to hold all the things
+    paranthesesElement *element=elementBase->ptr;
+    for(i=0;i<n;i++){
+        baseElement *mainMultipclationBaseElement=createMultipclationElement(3+i,false);
+        multipclationElement *mainMultipclationElement=mainMultipclationBaseElement->ptr;
+        mainMultipclationElement->elementArray[0]=createConstantElement(getValueOfElement(differencesTableMatrix->elementMatrix[0][i],0));//delta^i f 0
+        mainMultipclationElement->elementArray[1]=createConstantElement(1/pow(h,i));//1/h^i
+        mainMultipclationElement->elementArray[2]=createConstantElement(1/((double)factorial(i)));//1/h^i
+        for(j=0;j<i;j++){
+            baseElement *xMinusXjBaseElement=createParanthesesElement(2,false);//multiply all the (x-xj)s
+            paranthesesElement *xMinusX=xMinusXjBaseElement->ptr;
+            xMinusX->elementArray[0]=createPolinominalElementAndFill(createConstantElement(1),createConstantElement(1));
+            xMinusX->elementArray[1]=createConstantElement(-1*xArray[j]);
+            mainMultipclationElement->elementArray[3+j]=xMinusXjBaseElement;
+        }
+        element->elementArray[i]=mainMultipclationBaseElement;
+    }
+    printf("Interpolated function is= ");
+    printElement(elementBase);
+    printf("\nPlease select an x value to test write -1 to exit\n");
+    while (input!=-1)
+    {
+        scanf("%lf",&input);
+        printf("%lf\n",getValueOfElement(elementBase,input));
+    }
+    free(elementBase);
+    
+}
+
 baseElement *findTheCofactorMatrix(baseElement *element){
     int i,j;
     matrixElement *tempMainMatrix=element->ptr;
@@ -1467,10 +1501,12 @@ baseElement* getTranspose(baseElement *matrix){
 }
 baseElement* getInverseOFAMatrix(baseElement *matrix)
 {
+    double det=findDeterminentOfMatrix(matrix);
+    return NULL;
     baseElement *cofactor=findTheCofactorMatrix(matrix);
     baseElement *transposeBaseElement=getTranspose(cofactor);
     matrixElement *transposeTemp=transposeBaseElement->ptr;
-    double det=findDeterminentOfMatrix(matrix);
+    
     int i;
     for(i=0;i<transposeTemp->n;i++){
         multiplyARowWithAConstant(transposeBaseElement,i,1/det);
@@ -1498,15 +1534,15 @@ void swapRows(baseElement *matrixBase, int firstRow,int secondRow){
     matrix->elementMatrix[firstRow]=matrix->elementMatrix[secondRow];
     matrix->elementMatrix[secondRow]=temp;
 }
-void gaussEliminationMethod(){
+baseElement* gaussEliminationMethod(baseElement *matrixBase){
     int n,m,i,j;
+    matrixElement *matrix=matrixBase->ptr;
+    n=matrix->n;
+    m=matrix->m;
     double tempCofactor,tempAnchorValue;
-    printf("Matrisin n ve m degerlerini girin\n");
-    scanf("%d %d",&n,&m);
-    printf("Matrisi girin");
-    baseElement *matrixBase=readAndCreateMatrix(n,m);
     baseElement *inverseMatrixBase=createMatrixElementWithAllElementsSetToZero(n,m);//instead of making the matrix bigger make a difference matrix for inverse since it is easier that way
-    matrixElement *matrix=matrixBase->ptr,*inverseMatrix=inverseMatrixBase->ptr;
+    matrixElement *inverseMatrix=inverseMatrixBase->ptr;
+    
     for(i=0;i<n;i++)setValueOfConstantElement(inverseMatrix->elementMatrix[i][i],1);
     for(i=0;i<n;i++){
         tempCofactor=1/getValueOfElement(matrix->elementMatrix[i][i],0);//after multiplying the value changes so i have to use some temp values
@@ -1525,28 +1561,18 @@ void gaussEliminationMethod(){
         printElement(inverseMatrixBase);
         printf("\n");
     }
-    
-    freeMemoryOfElement(matrixBase);
-    freeMemoryOfElement(inverseMatrixBase);
+    return inverseMatrixBase;
 }
-void GaussSeidelIterationMethod(){
+void GaussSeidelIterationMethod(baseElement *coefficentMatrixBase,baseElement *constantMatrixBase,double *xValues,double epsilon){
     int n,m,i,j,iterationNumber=0,k;
-    double tempCofactor,tempAnchorValue,epsilon,sum;
+    double tempCofactor,tempAnchorValue,sum;
     bool isFinished=false;
-    printf("Epsilon degerini girin\n");
-    scanf("%lf",&epsilon);
-    printf("Katsayi matrisinin n ve m degerlerini girin\n");
-    scanf("%d %d",&n,&m);
-    printf("Matrisi girin\n");
-    baseElement *coefficentMatrixBase=readAndCreateMatrix(n,m);
-    printf("Sabit sayilar matrisini girin\n");
-    baseElement *constantsMatrixBase=readAndCreateMatrix(m,1);
-    matrixElement *constantMatrix=constantsMatrixBase->ptr,*coefficentMatrix=coefficentMatrixBase->ptr;
-    double *xValues=calloc(m,sizeof(double));
-    printf("Degiskenlerin baslangic degerlerini girin\n");
-    for(i=0;i<n;i++)scanf("%lf",xValues+i);
+    matrixElement *constantMatrix=constantMatrixBase->ptr,*coefficentMatrix=coefficentMatrixBase->ptr;
+    n=coefficentMatrix->n;
+    m=coefficentMatrix->m;
     double max=0;
     int maxIndex=0;
+
     for(j=0;j<n;j++){//make the diagonal multipclation the biggest it can be
         for(i=0;i<m;i++){
             if(fabs(getValueOfElement(coefficentMatrix->elementMatrix[i][j],0))>max)
