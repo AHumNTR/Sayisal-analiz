@@ -10,51 +10,51 @@ int main(){
     double x=0;
     //gregoryNewtonEnterpolation();
     while(true){
-        printf("Istediginiz yontemi secin\n1: Bisection yontemi\n2: Regula-falsi\n3: Newton-Rapshon yontemi\n4: NxNlik bir matrisin tersi\n5: Gauus Eleminasyon\n6: Gauss Seidal yöntemleri\n7: Sayisal Türev (merkezi, ileri ve geri farklar opsiyonlu)\n8: Simpson yöntemi\n9: Trapez yöntemi\n10: Değişken dönüşümsüz Gregory newton Enterpolasyonu\n11: Analitik turev\n");
+        printf("Istediginiz yontemi secin\n1: Bisection yontemi\n2: Regula-falsi\n3: Newton-Rapshon yontemi\n4: NxNlik bir matrisin tersi\n5: Gauus Eleminasyon\n6: Gauss Seidal yontemleri\n7: Sayisal Turev (merkezi, ileri ve geri farklar opsiyonlu)\n8: Simpson yontemi\n9: Trapez yontemi\n10: Degisken dnusumsuz Gregory newton Enterpolasyonu\n11: Analitik turev\n");
         scanf("%d",&mode);
         if(mode==1){
-            while ((c = getchar()) != '\n' && c != EOF);
+            
             double aStart, bStart,ep;
             baseElement *element=readFunction();
             printf("a ve b noktalarini girin\n");
             scanf("%lf %lf", &aStart, &bStart);
             printf("epsilon degerini girin\n");
             scanf("%lf",&ep);
-            printf("Kok degeri=%lf",BisectionSearch(element,aStart,bStart,ep));
+            printf("Kok degeri=%lf\n",BisectionSearch(element,aStart,bStart,ep));
             freeMemoryOfElement(element);
         }
         else if(mode==2){
-            while ((c = getchar()) != '\n' && c != EOF);
+            
             double xcStart, xpStart,ep;
             baseElement *element=readFunction();
             printf("Ilk iki x degerini girin\n");
             scanf("%lf %lf", &xcStart, &xpStart);
             printf("epsilon degerini girin\n");
             scanf("%lf", &ep);
-            printf("Kok degeri=%lf",RegulaFalsi(element,xcStart,xpStart,ep));
+            printf("Kok degeri=%lf\n",RegulaFalsi(element,xcStart,xpStart,ep));
             freeMemoryOfElement(element);
         }
         else if(mode==3){
-            while ((c = getchar()) != '\n' && c != EOF);
+            
             double xStart,ep;
             baseElement *element=readFunction();
             printf("Ilk x degerini girin\n");
             scanf("%lf", &xStart);
             printf("epsilon degerini girin\n");
             scanf("%lf", &ep);
-            printf("Kok degeri=%lf",NewtonRaphson(element,xStart,ep));
+            printf("Kok degeri=%lf\n",NewtonRaphson(element,xStart,ep));
             freeMemoryOfElement(element);
         }
         else if(mode==4){
             int n;
             printf("Matrisin n degerini girin\n");
             scanf("%d",&n);
-            printf("Matrisi girin");
+            printf("Matrisi girin\n");
             baseElement *matrix=readAndCreateMatrix(n,n);
             baseElement *inverseMatrix=getInverseOFAMatrix(matrix);
             if(inverseMatrix==NULL)
             {
-                printf("Matrisin tersi yoktur");
+                printf("Matrisin tersi yoktur\n");
                 freeMemoryOfElement(matrix);
             }
             else{
@@ -68,7 +68,7 @@ int main(){
             int n;
             printf("Matrisin n degerini girin\n");
             scanf("%d",&n);
-            printf("Matrisi girin");
+            printf("Matrisi girin\n");
             baseElement *matrix=readAndCreateMatrix(n,n);
             baseElement *inverseMatrix=gaussEliminationMethod(matrix);
             printf("Matrisin tersi: \n");
@@ -94,7 +94,7 @@ int main(){
             GaussSeidelIterationMethod(coefficentMatrixBase,constantsMatrixBase,xValues,epsilon);
         }
         else if(mode==7){
-            while ((c = getchar()) != '\n' && c != EOF);
+            
             baseElement *element=readFunction();
             int derivativeMode;
             double h, x, numericalDerivativeValue, analiticalDerivativeValue;
@@ -116,7 +116,7 @@ int main(){
             printf("Sayisal turevin mutlak hatasi = %lf\n",fabs(numericalDerivativeValue-analiticalDerivativeValue));
         }
         else if(mode==8){
-            while ((c = getchar()) != '\n' && c != EOF);
+            
             double xSStart,xEStart,h;
             int simpsonMode;
             baseElement *element=readFunction();
@@ -130,7 +130,7 @@ int main(){
             freeMemoryOfElement(element);
         }
         else if(mode==9){
-            while ((c = getchar()) != '\n' && c != EOF);
+            
             double xSStart,xEStart,h;
             baseElement *element=readFunction();
             printf("Ilk ve son x degerlerini girin\n");
@@ -151,36 +151,26 @@ int main(){
             for(i=0;i<n;i++){
                 scanf("%lf %lf",xArray+i,(double*)differencesTableMatrix->elementMatrix[i][0]->ptr);
             }
-            for(j=1;j<n;j++){//how this is set up would allow me to acces nth differensial of xi by using [i][n]
-                for(i=0;i<n-j;i++){
-                setValueOfConstantElement(differencesTableMatrix->elementMatrix[i][j],getValueOfElement(differencesTableMatrix->elementMatrix[i+1][j-1],0)-getValueOfElement(differencesTableMatrix->elementMatrix[i][j-1],0));
-                }
-            }
-            printElement(differencesTableMatrixBaseElement);
-            printf("\n");
+            baseElement *enterpoletedFunction=gregoryNewtonEnterpolation(differencesTableMatrixBaseElement,xArray);
         }
         else if(mode==11){
-            while ((c = getchar()) != '\n' && c != EOF);
+            
             baseElement *element=readFunction(),*derivative;
             derivative=derivate(element);
-            printf("X degerini girin\n");
-            double x;
-            scanf("%lf",&x);
+            double x=0;
+            
             printf("Fonksiyonun analitik turevi =");
             printElement(derivative);
-            printf("\nAnalitik turevinin x=%lfdeki degeri = %lf\n",x,getValueOfElement(derivative,x));
+            while(x!=-1){
+                printf("\nX degerini girin cikmak icin -1 girin\n");
+                scanf("%lf",&x);
+                printf("\nAnalitik turevinin x=%lfdeki degeri = %lf\n",x,getValueOfElement(derivative,x));
+            }
             freeMemoryOfElement(derivative);
             freeMemoryOfElement(element);
         }
         printf("Press any button to continue");
         getchar();
-        //scanf("%lf",&x);
-        //printf("%lf\n",getValueOfElement(function,x));
-        //derivitive=derivate(function);
-        //printf("derivitive =%lf\n",getValueOfElement(derivitive,x));
-        //printElement(derivitive);
-        //freeMemoryOfElement(function);
-        //freeMemoryOfElement(derivitive);
         while ((c = getchar()) != '\n' && c != EOF);
     }
     return 0;

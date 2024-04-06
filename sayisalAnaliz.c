@@ -5,10 +5,16 @@
 #include <math.h>
 #include "sayisalAnaliz.h"
 baseElement *readFunction(){
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
     printf("Lutfen fonksiyonu girin\n");
     char input[1000];
-    fgets(input,1000,stdin);
-    baseElement *elements=malloc(sizeof(baseElement));
+    fgets(input+1,1000,stdin);
+    c=0;
+    while(input[c]!='\n'&&input[c]!='\0')c++;
+    input[c]=')';
+    input[c+1]='\0';
+    baseElement *elements=(baseElement*)malloc(sizeof(baseElement));
     checkAndConvertToParanthesesElements(input,elements);
     return elements;
 
@@ -16,7 +22,7 @@ baseElement *readFunction(){
 void addElementToTheList(char ***elementsString, char *input, int *startIndex, int endIndex, int *elementCount)
 {
     *elementsString = (char **)realloc(*elementsString, (*elementCount + 1) * sizeof(char *));
-    (*elementsString)[*elementCount] = calloc(endIndex - *startIndex + 1, (sizeof(char)));
+    (*elementsString)[*elementCount] = (char*)calloc(endIndex - *startIndex + 1, (sizeof(char)));
     memcpy((*elementsString)[*elementCount], input + *startIndex, endIndex - *startIndex);
     (*elementsString)[*elementCount][endIndex - *startIndex] = '\0';
     *elementCount += 1;
@@ -78,7 +84,7 @@ void splitIntoExponentialElements(char ***elementsString, char *input, int *elem
 bool checkAndConvertToConstantElement(char *elementString, baseElement *constant)
 {
     int i = 0, j = 0, dotsIndex = -1;
-    double *temp = calloc(1, sizeof(double)); // i was using malloc here and it was not working randomly and ive spent a lot of time trying to fix it :(
+    double *temp = (double*)calloc(1, sizeof(double)); // i was using malloc here and it was not working randomly and ive spent a lot of time trying to fix it :(
     bool isNegative = false, hasSign = true;
     if (elementString[0] == '-')
         isNegative = true;
@@ -116,7 +122,7 @@ bool checkAndConvertToParanthesesElements(char *input, baseElement *parantheses)
     char **elementStrings = (char **)calloc(1, sizeof(char *));
     bool hasSign = true, isNegative = false;
     int elementStringCount = 0, i = 0, elementCount = 0;
-    baseElement **elements = calloc(1, sizeof(baseElement *)); // element array to be stored in the parantheseselement
+    baseElement **elements = (baseElement**)calloc(1, sizeof(baseElement *)); // element array to be stored in the parantheseselement
     if (input[0] == '-')
     {
         isNegative = true;
@@ -129,7 +135,7 @@ bool checkAndConvertToParanthesesElements(char *input, baseElement *parantheses)
     splitIntoAdditionElements(&elementStrings, substr, &elementStringCount);
     convertAllElementsIntoTypes(&elementStrings, elementStringCount, &elements, &elementCount);
 
-    paranthesesElement *paranthesesPtr = calloc(1, sizeof(paranthesesElement)); // create the parantheses element
+    paranthesesElement *paranthesesPtr = (paranthesesElement*)calloc(1, sizeof(paranthesesElement)); // create the parantheses element
     parantheses->ptr = paranthesesPtr;                                          // set the pointer for the base element
     parantheses->type = paranthesesElementType;                                 // set the type
     paranthesesPtr->elementArray = elements;                                    // set the array on the parantheses element
@@ -1277,7 +1283,7 @@ double BisectionSearch(baseElement *element,double aStart,double bStart,double e
             i++;
         }
     }
-    else printf("Arada bulunabilecek bir kok yoktur");
+    else printf("Arada bulunabilecek bir kok yoktur\n");
     printf("iteration %d\na=%lf f(a)=%lf\nb=%lf f(b)=%lf\n", i, a, getValueOfElement(element, a), b, getValueOfElement(element, b));
     return a;
 }
@@ -1382,17 +1388,11 @@ double  numericalDerivative(baseElement *element,double x,double h,int mode)
     }
     return numericalDerivativeValue;
 }
-void gregoryNewtonEnterpolation(){
+baseElement* gregoryNewtonEnterpolation(baseElement *differencesTableMatrixBaseElement,double *xArray){
     int n,i,j;
-    printf("Nokta sayisini giriniz\n");
-    scanf("%d",&n);
-    baseElement *differencesTableMatrixBaseElement=createMatrixElementWithAllElementsSetToZero(n,n);
     matrixElement *differencesTableMatrix=differencesTableMatrixBaseElement->ptr;
-    double xArray[n],h,input;
-    printf("x degerini ve karsilik gelen f(x) degerini girin\n");
-    for(i=0;i<n;i++){
-        scanf("%lf %lf",xArray+i,(double*)differencesTableMatrix->elementMatrix[i][0]->ptr);
-    }
+    n=differencesTableMatrix->n;
+    double h,input;
     for(j=1;j<n;j++){//how this is set up would allow me to acces nth differensial of xi by using [i][n]
         for(i=0;i<n-j;i++){
            setValueOfConstantElement(differencesTableMatrix->elementMatrix[i][j],getValueOfElement(differencesTableMatrix->elementMatrix[i+1][j-1],0)-getValueOfElement(differencesTableMatrix->elementMatrix[i][j-1],0));
@@ -1426,8 +1426,7 @@ void gregoryNewtonEnterpolation(){
         scanf("%lf",&input);
         printf("%lf\n",getValueOfElement(elementBase,input));
     }
-    free(elementBase);
-    
+    return elementBase;
 }
 
 baseElement *findTheCofactorMatrix(baseElement *element){
@@ -1466,6 +1465,7 @@ baseElement* getSubMatrix(baseElement* matrix,int iEliminate,int jEliminate){
 double findDeterminentOfMatrix(baseElement *element){
     if(element->type!=matrixElementType)return getValueOfElement(element,0);//act as if it was a 1x1 matrix
     matrixElement *temp=element->ptr;
+    if(temp->m==1&&temp->n==1)return getValueOfElement(temp->elementMatrix[0][0],0);
     if(temp->m==2&&temp->n==2)return getValueOfElement(temp->elementMatrix[0][0],0)*getValueOfElement(temp->elementMatrix[1][1],0)-getValueOfElement(temp->elementMatrix[1][0],0)*getValueOfElement(temp->elementMatrix[0][1],0);//return the value if its 2x2
     int iDet;
     double det=0;
@@ -1502,8 +1502,10 @@ baseElement* getTranspose(baseElement *matrix){
 baseElement* getInverseOFAMatrix(baseElement *matrix)
 {
     double det=findDeterminentOfMatrix(matrix);
-    return NULL;
+    if(det==0)return NULL;
     baseElement *cofactor=findTheCofactorMatrix(matrix);
+    printElement(matrix);
+    printElement(cofactor);
     baseElement *transposeBaseElement=getTranspose(cofactor);
     matrixElement *transposeTemp=transposeBaseElement->ptr;
     
@@ -1512,6 +1514,7 @@ baseElement* getInverseOFAMatrix(baseElement *matrix)
         multiplyARowWithAConstant(transposeBaseElement,i,1/det);
     }
     freeMemoryOfElement(cofactor);
+    printElement(transposeBaseElement);
     return transposeBaseElement;
 }
 void addARowToAnother(baseElement *matrixBase,int source,int dest,double coefficent){
@@ -1572,8 +1575,9 @@ void GaussSeidelIterationMethod(baseElement *coefficentMatrixBase,baseElement *c
     m=coefficentMatrix->m;
     double max=0;
     int maxIndex=0;
-
-    for(j=0;j<n;j++){//make the diagonal multipclation the biggest it can be
+    int alreadySwapped[n];
+    for(i=0;i<n;i++)alreadySwapped[i]=-1;
+    for(j=0;j<n;j++){//make the diagonal multipclation the biggest it can be this algorithm isnt done yet diagonaldaki o satirin en buyuku olcak bu algoritma komple yanlis
         for(i=0;i<m;i++){
             if(fabs(getValueOfElement(coefficentMatrix->elementMatrix[i][j],0))>max)
             {
@@ -1581,7 +1585,22 @@ void GaussSeidelIterationMethod(baseElement *coefficentMatrixBase,baseElement *c
                 maxIndex=i;
             }
         }
-        swapRows(coefficentMatrixBase,j,maxIndex);
+        if(alreadySwapped[maxIndex]==-1){
+            alreadySwapped[j]=max;
+            swapRows(coefficentMatrixBase,j,maxIndex);
+            swapRows(constantMatrixBase,j,maxIndex);
+        }
+        else{
+            if(alreadySwapped[maxIndex]<max){
+                alreadySwapped[j]=max;
+                swapRows(coefficentMatrixBase,j,maxIndex);
+                swapRows(constantMatrixBase,j,maxIndex);
+            }
+           printf("Matris kosegence baskin hale getirilemiyor dogru sonuc vermeyebilir menuye donmek icin 0 devam etmek icin 1 yazin\n"); 
+           k=getchar();
+           if(k==0)return;
+        }
+        
         max=0;
     }
    printElement(coefficentMatrixBase);

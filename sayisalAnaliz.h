@@ -108,7 +108,7 @@ double NewtonRaphson(baseElement *element,double xStart,double ep);
 double Trapes(baseElement *element,double xSStart, double xEStart, double h);
 double Simpson(baseElement *element,double xSStart,double xEStart,double h,int mode);
 double  numericalDerivative(baseElement *element,double x,double h,int mode);
-void gregoryNewtonEnterpolation();
+baseElement* gregoryNewtonEnterpolation(baseElement *differencesTableMatrixBaseElement,double *xArray);
 
 baseElement* readAndCreateMatrix(int n,int m);
 baseElement* getSubMatrix(baseElement* matrix,int iEliminate,int jEliminate);
