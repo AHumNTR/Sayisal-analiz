@@ -10,6 +10,7 @@ baseElement *readFunction(){
     printf("Lutfen fonksiyonu girin\n");
     char input[1000];
     fgets(input+1,1000,stdin);
+    input[0]='(';
     c=0;
     while(input[c]!='\n'&&input[c]!='\0')c++;
     input[c]=')';
@@ -123,6 +124,7 @@ bool checkAndConvertToParanthesesElements(char *input, baseElement *parantheses)
     bool hasSign = true, isNegative = false;
     int elementStringCount = 0, i = 0, elementCount = 0;
     baseElement **elements = (baseElement**)calloc(1, sizeof(baseElement *)); // element array to be stored in the parantheseselement
+    
     if (input[0] == '-')
     {
         isNegative = true;
@@ -132,9 +134,8 @@ bool checkAndConvertToParanthesesElements(char *input, baseElement *parantheses)
     while (input[i] != '\n' && input[i] != '\0')
         i++;
     char *substr = substring(input, 1 + hasSign, i - 2);
-    splitIntoAdditionElements(&elementStrings, substr, &elementStringCount);
+	splitIntoAdditionElements(&elementStrings, substr, &elementStringCount);
     convertAllElementsIntoTypes(&elementStrings, elementStringCount, &elements, &elementCount);
-
     paranthesesElement *paranthesesPtr = (paranthesesElement*)calloc(1, sizeof(paranthesesElement)); // create the parantheses element
     parantheses->ptr = paranthesesPtr;                                          // set the pointer for the base element
     parantheses->type = paranthesesElementType;                                 // set the type
@@ -151,8 +152,8 @@ bool checkAndConvertToParanthesesElements(char *input, baseElement *parantheses)
 }
 bool checkAndConvertToPolinominal(char *input, baseElement *polinom)
 {
-    char **elementsString = calloc(1, sizeof(char *));
-    elementsString[0] = calloc(1, sizeof(char));
+    char **elementsString = (char**)calloc(1, sizeof(char *));
+    elementsString[0] = (char*)calloc(1, sizeof(char));
     int elementCount = 0, i = 0;
     double coefficent = 1, exp = 0;
     baseElement tempConstant;
@@ -225,12 +226,12 @@ bool checkAndConvertToPolinominal(char *input, baseElement *polinom)
         free(elementsString);
         return false; // return if there is no x
     }
-    polinominalElement *tempPolinominalElement = calloc(1, sizeof(polinominalElement));
-    baseElement *coefficentElement = calloc(1, sizeof(baseElement)), *expElement = calloc(1, sizeof(baseElement)); // make a base element for coefficent and exp values (this isnt usefull for poliniminal elements since both exp and coefficent is gonna be constant but will come in usefull when dealing with exponantial functions)
+    polinominalElement *tempPolinominalElement = (polinominalElement*)calloc(1, sizeof(polinominalElement));
+    baseElement *coefficentElement = (baseElement*)calloc(1, sizeof(baseElement)), *expElement = (baseElement*)calloc(1, sizeof(baseElement)); // make a base element for coefficent and exp values (this isnt usefull for poliniminal elements since both exp and coefficent is gonna be constant but will come in usefull when dealing with exponantial functions)
     coefficentElement->type = constantElementType;
     expElement->type = constantElementType;
 
-    double *coefficentPtr = calloc(1, sizeof(double)), *expPtr = calloc(1, sizeof(double)); // make pointers for coeffient and exp to be stored int their baseElement
+    double *coefficentPtr = (double*)calloc(1, sizeof(double)), *expPtr = (double*)calloc(1, sizeof(double)); // make pointers for coeffient and exp to be stored int their baseElement
     *coefficentPtr = coefficent;
     *expPtr = exp;
     coefficentElement->ptr = coefficentPtr;
@@ -249,9 +250,9 @@ bool checkAndConvertToPolinominal(char *input, baseElement *polinom)
 }
 bool checkAndConvertToMultipclationElement(char *input, baseElement *multipclationElementBase)
 {
-    char **elementsString = calloc(1, sizeof(char *));
+    char **elementsString = (char**)calloc(1, sizeof(char *));
 
-    elementsString[0] = calloc(1, sizeof(char));
+    elementsString[0] = (char*)calloc(1, sizeof(char));
     int elementStringCount = 0, i;
     splitIntoMultipclationElements(&elementsString, input, &elementStringCount); // split the input into parts
     if (elementStringCount == 1)
@@ -263,7 +264,7 @@ bool checkAndConvertToMultipclationElement(char *input, baseElement *multipclati
         free(elementsString);
         return false;
     } // if its one factor there is no need for it to be MultipclationElement
-    baseElement **elements = calloc(elementStringCount, sizeof(baseElement *));
+    baseElement **elements = (baseElement**)calloc(elementStringCount, sizeof(baseElement *));
     bool hasSign = true, isADivider = false;
 
     for (i = 0; i < elementStringCount; i++)
@@ -274,18 +275,18 @@ bool checkAndConvertToMultipclationElement(char *input, baseElement *multipclati
             isADivider = true;
         else if (elementsString[i][0] != '*')
             hasSign = false;
-        elements[i] = calloc(1, sizeof(baseElement));
+        elements[i] = (baseElement*)calloc(1, sizeof(baseElement));
         convertElementIntoTypes(elementsString[i] + hasSign, *(elements + i)); // try and convert it into a type
         if (isADivider)
         {                                                                  // change this element with a exponential element that has a exp of -1
-            baseElement *expConstantBase = calloc(1, sizeof(baseElement)); // make a base element for exp and put -1 in it
-            double *expValuePtr = calloc(1, sizeof(double));
+            baseElement *expConstantBase = (baseElement*)calloc(1, sizeof(baseElement)); // make a base element for exp and put -1 in it
+            double *expValuePtr = (double*)calloc(1, sizeof(double));
             *expValuePtr = -1;
             expConstantBase->type = constantElementType; // set up exp base and coefficent base
             expConstantBase->ptr = expValuePtr;
-            exponentialElement *divider = calloc(1, sizeof(exponentialElement)); // set the exponentialElement
+            exponentialElement *divider = (exponentialElement*)calloc(1, sizeof(exponentialElement)); // set the exponentialElement
             divider->isNegative = false;                                         // if it was something like 1/-2 it should be written as 1/(-2)
-            baseElement *temp = calloc(1, sizeof(baseElement));                  // make a copy of the element since its gonna get replaced
+            baseElement *temp = (baseElement*)calloc(1, sizeof(baseElement));                  // make a copy of the element since its gonna get replaced
             memcpy(temp, *(elements + i), sizeof(baseElement));
             divider->exp = expConstantBase;
             divider->element = temp;
@@ -293,7 +294,7 @@ bool checkAndConvertToMultipclationElement(char *input, baseElement *multipclati
             (*(elements + i))->ptr = divider;
         }
     }
-    multipclationElement *temp = calloc(1, sizeof(multipclationElement));
+    multipclationElement *temp = (multipclationElement*)calloc(1, sizeof(multipclationElement));
     temp->elementArray = elements;
     temp->elementCount = elementStringCount;
     multipclationElementBase->type = multipclationElementType;
@@ -308,10 +309,10 @@ bool checkAndConvertToMultipclationElement(char *input, baseElement *multipclati
 }
 bool checkAndConvertToExponentialElement(char *input, baseElement *expElementBase)
 {
-    char **elementsString = calloc(1, sizeof(char *));
-    baseElement *base = calloc(1, sizeof(baseElement)), *exp = calloc(1, sizeof(baseElement));
-    exponentialElement *expElement = calloc(1, sizeof(exponentialElement));
-    elementsString[0] = calloc(1, sizeof(char));
+    char **elementsString = (char**)calloc(1, sizeof(char *));
+    baseElement *base = (baseElement*)calloc(1, sizeof(baseElement)), *exp = (baseElement*)calloc(1, sizeof(baseElement));
+    exponentialElement *expElement = (exponentialElement*)calloc(1, sizeof(exponentialElement));
+    elementsString[0] = (char*)calloc(1, sizeof(char));
     int elementStringCount = 0, i = 1, elementCount = 0;
     splitIntoExponentialElements(&elementsString, input, &elementStringCount); // split it up
     if (elementStringCount == 1)
@@ -345,14 +346,14 @@ bool checkAndConvertToExponentialElement(char *input, baseElement *expElementBas
 }
 bool checkAndConvertToSingleParameterFunctionElement(char *input, baseElement *singleParameterFunctionElementBase)
 {
-    char **elementsString = calloc(1, sizeof(char *));
-    elementsString[0] = calloc(1, sizeof(char));
+    char **elementsString = (char**)calloc(1, sizeof(char *));
+    elementsString[0] = (char*)calloc(1, sizeof(char));
     int elementCount = 0, elementStringCount = 0;
     splitIntoMultipclationElements(&elementsString, input, &elementStringCount); // check if there is any other factor than the function return if there is cause we want elements with more than one factor to be stored in the MultipclationElement
     if (elementStringCount != 1)
         return false;
-    baseElement *parameter = calloc(1, sizeof(baseElement));
-    singleParameterFunctionElement *singleParameterFuncElement = calloc(1, sizeof(singleParameterFunctionElement));
+    baseElement *parameter = (baseElement*)calloc(1, sizeof(baseElement));
+    singleParameterFunctionElement *singleParameterFuncElement = (singleParameterFunctionElement*)calloc(1, sizeof(singleParameterFunctionElement));
     char functions[][10] = {"sin", "cos", "tan", "cot", "sec", "cosec", "arcsin", "arccos", "arcsec", "arccosec", "arctan", "arccot", "ln"};
     int lenghts[] = {3, 3, 3, 3, 3, 5, 6, 6, 6, 8, 6, 6, 2};
     bool hasSign = true, isNegative = false; // this could actually be made into a func but idk if its worth it
@@ -375,7 +376,7 @@ bool checkAndConvertToSingleParameterFunctionElement(char *input, baseElement *s
         return false;
     }
 
-    singleParameterFuncElement->functionType = i;
+    singleParameterFuncElement->functionType = (singleParameterFunctionTypes)i;
     convertElementIntoTypes(input + lenghts[i] + hasSign, parameter); // convert the parameter into types
     singleParameterFuncElement->parameter = parameter;
     singleParameterFuncElement->isNegative = isNegative;
@@ -390,14 +391,14 @@ bool checkAndConvertToSingleParameterFunctionElement(char *input, baseElement *s
 }
 bool checkAndConvertToDualParameterFunctionElement(char *input, baseElement *dualParameterFunctionElementBase)
 {
-    char **elementsString = calloc(1, sizeof(char *));
-    elementsString[0] = calloc(1, sizeof(char));
+    char **elementsString = (char**)calloc(1, sizeof(char *));
+    elementsString[0] = (char*)calloc(1, sizeof(char));
     int elementStringCount = 0;
     splitIntoMultipclationElements(&elementsString, input, &elementStringCount); // check if there is any other factor than the function return if there is cause we want elements with more than one factor to be stored in the MultipclationElement
     if (elementStringCount != 1)
         return false;
-    baseElement *parameter1 = calloc(1, sizeof(baseElement)), *parameter2 = calloc(1, sizeof(baseElement));
-    dualParameterFunctionElement *dualParameterFuncElement = calloc(1, sizeof(dualParameterFunctionElement));
+    baseElement *parameter1 = (baseElement*)calloc(1, sizeof(baseElement)), *parameter2 = (baseElement*)calloc(1, sizeof(baseElement));
+    dualParameterFunctionElement *dualParameterFuncElement = (dualParameterFunctionElement*)calloc(1, sizeof(dualParameterFunctionElement));
     char functions[][10] = {"log"};
     int lenghts[] = {3};
     bool hasSign = true, isNegative = false; // this could actually be made into a func but idk if its worth it
@@ -437,7 +438,7 @@ bool checkAndConvertToDualParameterFunctionElement(char *input, baseElement *dua
         return false;
     } // means there is no second parameter
 
-    dualParameterFuncElement->functionType = i;
+    dualParameterFuncElement->functionType = (dualParameterFunctionTypes)i;
     char *parameter1String = substring(input, lenghts[i] + hasSign + 1, j - 1);
     convertElementIntoTypes(parameter1String, parameter1); // convert the first parameter into types
     convertElementIntoTypes(input + j, parameter2);        // convert the second parameter into types
@@ -507,8 +508,8 @@ double getValueOfElement(baseElement *element, double x)
     }
     else if (element->type == singleParameterFunctionElementType)
     {
-        singleParameterFunctionElement *temp = element->ptr;
-        double value;
+        singleParameterFunctionElement *temp = (singleParameterFunctionElement*)element->ptr;
+        double value, temp1;
         // printf("entering func\n");
         switch (temp->functionType)
         {
@@ -548,7 +549,7 @@ double getValueOfElement(baseElement *element, double x)
             value = asin(1 / getValueOfElement(temp->parameter, x));
             break;
         case lnT:
-            double temp1 = getValueOfElement(temp->parameter, x);
+            temp1 = getValueOfElement(temp->parameter, x);
             if (temp1 < 0)
                 printf("ln parameter out of range using absolute instead\n");
             value = log(fabs(getValueOfElement(temp->parameter, x))) / log(e);
@@ -564,7 +565,7 @@ double getValueOfElement(baseElement *element, double x)
     }
     else if (element->type == dualParameterFunctionElementType)
     {
-        dualParameterFunctionElement *temp = element->ptr;
+        dualParameterFunctionElement *temp = (dualParameterFunctionElement*)element->ptr;
         double value;
         // printf("entering log\n");
         switch (temp->functionType)
@@ -609,9 +610,8 @@ void convertAllElementsIntoTypes(char ***elementsString, int elementStringCount,
     {
         *elements = (baseElement **)realloc(*elements, (*elementCount + 1) * sizeof(baseElement *));
         *elementCount += 1; // if it didnt return it means it was succesfull and that we need to make room for more elements
-        *(*elements + i) = calloc(1, sizeof(baseElement));
-        if (convertElementIntoTypes((*elementsString)[i], *(*elements + i)))
-            ;
+        *(*elements + i) = (baseElement*)calloc(1, sizeof(baseElement));
+        if (convertElementIntoTypes((*elementsString)[i], *(*elements + i)));//should probably do some stuff here if it returns false. Eh maybe later
     }
 }
 
@@ -622,20 +622,20 @@ baseElement *derivate(baseElement *element)
 
     else if (element->type == polinominalElementType)
     {
-        polinominalElement *temp = element->ptr;
+        polinominalElement *temp = (polinominalElement*)element->ptr;
         return createPolinominalElementAndFill(createConstantElement(getValueOfElement(temp->coefficent, 0) * getValueOfElement(temp->exp, 0)), createConstantElement(getValueOfElement(temp->exp, 0) - 1));
     }
     else if (element->type == exponentialElementType)
     {                                                       // d(f(x)^g(x))= ( gt(x)*ln(f(x))+ft(x)*g(x)/f(x) )*f(x)^g(x)
         baseElement *tempBase = makeCopyOfElement(element); // make a copy of element so that when i free element i can still free the derivative of element
-        exponentialElement *temp = tempBase->ptr;
+        exponentialElement *temp = (exponentialElement*)tempBase->ptr;
 
         baseElement *derivitive = createMultipclationElement(2, false);
         baseElement *ftGdivFxBaseElement = createMultipclationElement(3, false), *gtLnFBaseElement = createMultipclationElement(2, false);
 
-        multipclationElement *mainMultipclationElement = derivitive->ptr, *gtLnF = gtLnFBaseElement->ptr, *ftGDivFx = ftGdivFxBaseElement->ptr;
+        multipclationElement *mainMultipclationElement = (multipclationElement*)derivitive->ptr, *gtLnF = (multipclationElement*)gtLnFBaseElement->ptr, *ftGDivFx = (multipclationElement*)ftGdivFxBaseElement->ptr;
         baseElement *mainParanthesesBaseElement = createParanthesesElement(2, false);
-        paranthesesElement *mainParanthesesElement = mainParanthesesBaseElement->ptr;
+        paranthesesElement *mainParanthesesElement = (paranthesesElement*)mainParanthesesBaseElement->ptr;
 
         mainMultipclationElement->elementArray[0] = element; //*f(x)^g(x)this part
         mainMultipclationElement->elementArray[1] = mainParanthesesBaseElement;
@@ -658,12 +658,12 @@ baseElement *derivate(baseElement *element)
     else if (element->type == singleParameterFunctionElementType)
     {
         baseElement *tempBase = makeCopyOfElement(element);
-        singleParameterFunctionElement *temp = tempBase->ptr;
+        singleParameterFunctionElement *temp = (singleParameterFunctionElement*)tempBase->ptr;
         baseElement *derivitive;
         if (temp->functionType == sinT)
         {
             derivitive = createMultipclationElement(2, false);
-            multipclationElement *tempMultipclationElement = derivitive->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createSingleParameterFunctionElementAndFill(cosT, false, temp->parameter);
             return derivitive;
@@ -671,7 +671,7 @@ baseElement *derivate(baseElement *element)
         else if (temp->functionType == cosT)
         {
             derivitive = createMultipclationElement(2, false);
-            multipclationElement *tempMultipclationElement = derivitive->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createSingleParameterFunctionElementAndFill(sinT, true, temp->parameter);
             return derivitive;
@@ -679,7 +679,7 @@ baseElement *derivate(baseElement *element)
         else if (temp->functionType == tanT)
         {
             derivitive = createMultipclationElement(2, false);
-            multipclationElement *tempMultipclationElement = derivitive->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createExponentialElementAndFill(false, createSingleParameterFunctionElementAndFill(secT, false, temp->parameter), createConstantElement(2));
             return derivitive;
@@ -687,7 +687,7 @@ baseElement *derivate(baseElement *element)
         else if (temp->functionType == cotT)
         {
             derivitive = createMultipclationElement(2, false);
-            multipclationElement *tempMultipclationElement = derivitive->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createExponentialElementAndFill(false, createSingleParameterFunctionElementAndFill(cosecT, true, temp->parameter), createConstantElement(-2));
             return derivitive;
@@ -695,7 +695,7 @@ baseElement *derivate(baseElement *element)
         else if (temp->functionType == secT)
         {
             derivitive = createMultipclationElement(3, false);
-            multipclationElement *tempMultipclationElement = derivitive->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createSingleParameterFunctionElementAndFill(tanT, false, temp->parameter);
             tempMultipclationElement->elementArray[2] = element; // this is pretty scary ngl
@@ -704,7 +704,7 @@ baseElement *derivate(baseElement *element)
         else if (temp->functionType == cosecT)
         {
             derivitive = createMultipclationElement(3, false);
-            multipclationElement *tempMultipclationElement = derivitive->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createSingleParameterFunctionElementAndFill(cotT, true, temp->parameter);
             tempMultipclationElement->elementArray[2] = element; // this is pretty scary ngl
@@ -713,11 +713,11 @@ baseElement *derivate(baseElement *element)
         else if (temp->functionType == arcsinT)
         {
             derivitive = createMultipclationElement(2, false);
-            multipclationElement *tempMultipclationElement = derivitive->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
 
             baseElement *tempParanthesesElementBase = createParanthesesElement(2, false);
-            paranthesesElement *tempParanthesesElement = tempParanthesesElementBase->ptr;
+            paranthesesElement *tempParanthesesElement = (paranthesesElement*)tempParanthesesElementBase->ptr;
             baseElement *parameterSquared = createExponentialElementAndFill(true, temp->parameter, createConstantElement(2));
             tempParanthesesElement->elementArray[0] = createConstantElement(1);
             tempParanthesesElement->elementArray[1] = parameterSquared;
@@ -728,11 +728,11 @@ baseElement *derivate(baseElement *element)
         else if (temp->functionType == arccosT)
         {
             derivitive = createMultipclationElement(2, true);
-            multipclationElement *tempMultipclationElement = derivitive->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
 
             baseElement *tempParanthesesElementBase = createParanthesesElement(2, false);
-            paranthesesElement *tempParanthesesElement = tempParanthesesElementBase->ptr;
+            paranthesesElement *tempParanthesesElement = (paranthesesElement*)tempParanthesesElementBase->ptr;
             baseElement *parameterSquared = createExponentialElementAndFill(true, temp->parameter, createConstantElement(2));
             tempParanthesesElement->elementArray[0] = createConstantElement(1);
             tempParanthesesElement->elementArray[1] = parameterSquared;
@@ -743,11 +743,11 @@ baseElement *derivate(baseElement *element)
         else if (temp->functionType == arctanT)
         {
             derivitive = createMultipclationElement(2, false);
-            multipclationElement *tempMultipclationElement = derivitive->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
 
             baseElement *tempParanthesesElementBase = createParanthesesElement(2, false);
-            paranthesesElement *tempParanthesesElement = tempParanthesesElementBase->ptr;
+            paranthesesElement *tempParanthesesElement = (paranthesesElement*)tempParanthesesElementBase->ptr;
             baseElement *parameterSquared = createExponentialElementAndFill(false, temp->parameter, createConstantElement(2));
             tempParanthesesElement->elementArray[0] = createConstantElement(1);
             tempParanthesesElement->elementArray[1] = parameterSquared;
@@ -758,11 +758,11 @@ baseElement *derivate(baseElement *element)
         else if (temp->functionType == arccotT)
         {
             derivitive = createMultipclationElement(2, true);
-            multipclationElement *tempMultipclationElement = derivitive->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
 
             baseElement *tempParanthesesElementBase = createParanthesesElement(2, false);
-            paranthesesElement *tempParanthesesElement = tempParanthesesElementBase->ptr;
+            paranthesesElement *tempParanthesesElement = (paranthesesElement*)tempParanthesesElementBase->ptr;
             baseElement *parameterSquared = createExponentialElementAndFill(false, temp->parameter, createConstantElement(2));
             tempParanthesesElement->elementArray[0] = createConstantElement(1);
             tempParanthesesElement->elementArray[1] = parameterSquared;
@@ -773,12 +773,12 @@ baseElement *derivate(baseElement *element)
         else if (temp->functionType == arcsecT)
         {
             derivitive = createMultipclationElement(3, false);
-            multipclationElement *tempMultipclationElement = derivitive->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createExponentialElementAndFill(false, temp->parameter, createConstantElement(-1));
 
             baseElement *tempParanthesesElementBase = createParanthesesElement(2, false);
-            paranthesesElement *tempParanthesesElement = tempParanthesesElementBase->ptr;
+            paranthesesElement *tempParanthesesElement = (paranthesesElement*)tempParanthesesElementBase->ptr;
             baseElement *parameterSquared = createExponentialElementAndFill(false, temp->parameter, createConstantElement(2));
             tempParanthesesElement->elementArray[0] = createConstantElement(-1);
             tempParanthesesElement->elementArray[1] = parameterSquared;
@@ -789,12 +789,12 @@ baseElement *derivate(baseElement *element)
         else if (temp->functionType == arccosecT)
         {
             derivitive = createMultipclationElement(3, true);
-            multipclationElement *tempMultipclationElement = derivitive->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createExponentialElementAndFill(false, temp->parameter, createConstantElement(-1));
 
             baseElement *tempParanthesesElementBase = createParanthesesElement(2, false);
-            paranthesesElement *tempParanthesesElement = tempParanthesesElementBase->ptr;
+            paranthesesElement *tempParanthesesElement = (paranthesesElement*)tempParanthesesElementBase->ptr;
             baseElement *parameterSquared = createExponentialElementAndFill(false, temp->parameter, createConstantElement(2));
             tempParanthesesElement->elementArray[0] = createConstantElement(-1);
             tempParanthesesElement->elementArray[1] = parameterSquared;
@@ -805,7 +805,7 @@ baseElement *derivate(baseElement *element)
         else if (temp->functionType == lnT)
         { // d/dx(ln(f(x))=ft/f
             derivitive = createMultipclationElement(2, false);
-            multipclationElement *tempMultipclationElement = derivitive->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createExponentialElementAndFill(false, temp->parameter, createConstantElement(-1));
             return derivitive;
@@ -815,15 +815,15 @@ baseElement *derivate(baseElement *element)
     else if (element->type == dualParameterFunctionElementType)
     {
         baseElement *tempBase = makeCopyOfElement(element);
-        dualParameterFunctionElement *temp = tempBase->ptr;
+        dualParameterFunctionElement *temp = (dualParameterFunctionElement*)tempBase->ptr;
         if (temp->functionType == logT)
         { // d/dx(log_fx(g(x))=(gt*lnf/g-fd*lng/f)/((lnf)^2)
             baseElement *derivitive = createMultipclationElement(2, false);
             baseElement *mainParanthesesBaseElement = createParanthesesElement(2, false), *gtLnFDivGBaseElement = createMultipclationElement(3, false), *fdLnGdivFBaseElement = createMultipclationElement(3, false);
-            multipclationElement *tempMultipclationElement = derivitive->ptr, *gtLnFDivG = gtLnFDivGBaseElement->ptr, *fdLnGdivF = fdLnGdivFBaseElement->ptr;
+            multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr, *gtLnFDivG = (multipclationElement*)gtLnFDivGBaseElement->ptr, *fdLnGdivF = (multipclationElement*)fdLnGdivFBaseElement->ptr;
             tempMultipclationElement->elementArray[0] = createExponentialElementAndFill(false, createSingleParameterFunctionElementAndFill(lnT, false, temp->firstParameter), createConstantElement(-2)); // =/((lnf)^2)
             tempMultipclationElement->elementArray[1] = mainParanthesesBaseElement;
-            paranthesesElement *mainParanthesesElement = mainParanthesesBaseElement->ptr; // set the main parantheses
+            paranthesesElement *mainParanthesesElement = (paranthesesElement*)mainParanthesesBaseElement->ptr; // set the main parantheses
             mainParanthesesElement->elementArray[0] = gtLnFDivGBaseElement;
             mainParanthesesElement->elementArray[1] = fdLnGdivFBaseElement;
 
@@ -842,13 +842,13 @@ baseElement *derivate(baseElement *element)
     {
         int i = 0, j = 0;
         baseElement *tempBase = makeCopyOfElement(element);
-        multipclationElement *temp = tempBase->ptr;
+        multipclationElement *temp = (multipclationElement*)tempBase->ptr;
         baseElement *derivitive = createParanthesesElement(temp->elementCount, temp->isNegative);
-        paranthesesElement *newMultipclationElement = derivitive->ptr;
+        paranthesesElement *newMultipclationElement = (paranthesesElement*)derivitive->ptr;
         for (i = 0; i < newMultipclationElement->elementCount; i++)
         {
             baseElement *tempSubMultipclationBaseElement = createMultipclationElement(newMultipclationElement->elementCount, false);
-            multipclationElement *tempSubMultipclationElement = tempSubMultipclationBaseElement->ptr;
+            multipclationElement *tempSubMultipclationElement = (multipclationElement*)tempSubMultipclationBaseElement->ptr;
             for (j = 0; j < tempSubMultipclationElement->elementCount; j++)
             {
                 if (i != j)
@@ -865,9 +865,9 @@ baseElement *derivate(baseElement *element)
     {
         int i = 0;
         baseElement *tempBase = makeCopyOfElement(element);
-        paranthesesElement *temp = tempBase->ptr;
+        paranthesesElement *temp = (paranthesesElement*)tempBase->ptr;
         baseElement *derivitive = createParanthesesElement(temp->elementCount, temp->isNegative);
-        paranthesesElement *newParanthesesElement = derivitive->ptr;
+        paranthesesElement *newParanthesesElement = (paranthesesElement*)derivitive->ptr;
         for (i = 0; i < newParanthesesElement->elementCount; i++)
         {
             newParanthesesElement->elementArray[i] = derivate(temp->elementArray[i]);
@@ -879,16 +879,16 @@ baseElement *derivate(baseElement *element)
 }
 baseElement *createConstantElement(double value)
 {
-    baseElement *tempConstantBaseElement = calloc(1, sizeof(baseElement));
-    double *tempDouble = calloc(1, sizeof(double));
+    baseElement *tempConstantBaseElement = (baseElement*)calloc(1, sizeof(baseElement));
+    double *tempDouble = (double*)calloc(1, sizeof(double));
     *tempDouble = value;
     tempConstantBaseElement->ptr = tempDouble;
     return tempConstantBaseElement;
 }
 baseElement *createPolinominalElementAndFill(baseElement *coefficent, baseElement *exp)
 {
-    baseElement *tempPolinominalBaseElement = calloc(1, sizeof(baseElement));
-    polinominalElement *tempPolinominalElement = calloc(1, sizeof(polinominalElement));
+    baseElement *tempPolinominalBaseElement = (baseElement*)calloc(1, sizeof(baseElement));
+    polinominalElement *tempPolinominalElement = (polinominalElement*)calloc(1, sizeof(polinominalElement));
     tempPolinominalBaseElement->type = polinominalElementType;
     tempPolinominalBaseElement->ptr = tempPolinominalElement;
     tempPolinominalElement->coefficent = coefficent;
@@ -897,8 +897,8 @@ baseElement *createPolinominalElementAndFill(baseElement *coefficent, baseElemen
 }
 baseElement *createExponentialElement(bool isNegative)
 {
-    baseElement *tempExponentailBaseElement = calloc(1, sizeof(baseElement));
-    exponentialElement *tempExponentialElement = calloc(1, sizeof(exponentialElement));
+    baseElement *tempExponentailBaseElement = (baseElement*)calloc(1, sizeof(baseElement));
+    exponentialElement *tempExponentialElement = (exponentialElement*)calloc(1, sizeof(exponentialElement));
     tempExponentailBaseElement->type = exponentialElementType;
     tempExponentailBaseElement->ptr = tempExponentialElement;
     tempExponentialElement->isNegative = isNegative;
@@ -906,8 +906,8 @@ baseElement *createExponentialElement(bool isNegative)
 }
 baseElement *createExponentialElementAndFill(bool isNegative, baseElement *element, baseElement *exp)
 {
-    baseElement *tempExponentailBaseElement = calloc(1, sizeof(baseElement));
-    exponentialElement *tempExponentialElement = calloc(1, sizeof(exponentialElement));
+    baseElement *tempExponentailBaseElement = (baseElement*)calloc(1, sizeof(baseElement));
+    exponentialElement *tempExponentialElement = (exponentialElement*)calloc(1, sizeof(exponentialElement));
     tempExponentailBaseElement->type = exponentialElementType;
     tempExponentailBaseElement->ptr = tempExponentialElement;
     tempExponentialElement->element = element;
@@ -917,8 +917,8 @@ baseElement *createExponentialElementAndFill(bool isNegative, baseElement *eleme
 }
 baseElement *createSingleParameterFunctionElement(singleParameterFunctionTypes type, bool isNegative)
 {
-    baseElement *tempSingleParameterFunctionBaseElement = calloc(1, sizeof(baseElement));
-    singleParameterFunctionElement *tempSingleParameterFunctionElement = calloc(1, sizeof(singleParameterFunctionElement));
+    baseElement *tempSingleParameterFunctionBaseElement = (baseElement*)calloc(1, sizeof(baseElement));
+    singleParameterFunctionElement *tempSingleParameterFunctionElement = (singleParameterFunctionElement*)calloc(1, sizeof(singleParameterFunctionElement));
     tempSingleParameterFunctionBaseElement->ptr = tempSingleParameterFunctionElement;
     tempSingleParameterFunctionBaseElement->type = singleParameterFunctionElementType;
     tempSingleParameterFunctionElement->functionType = type;
@@ -927,8 +927,8 @@ baseElement *createSingleParameterFunctionElement(singleParameterFunctionTypes t
 }
 baseElement *createSingleParameterFunctionElementAndFill(singleParameterFunctionTypes type, bool isNegative, baseElement *parameter)
 {
-    baseElement *tempSingleParameterFunctionBaseElement = calloc(1, sizeof(baseElement));
-    singleParameterFunctionElement *tempSingleParameterFunctionElement = calloc(1, sizeof(singleParameterFunctionElement));
+    baseElement *tempSingleParameterFunctionBaseElement = (baseElement*)calloc(1, sizeof(baseElement));
+    singleParameterFunctionElement *tempSingleParameterFunctionElement = (singleParameterFunctionElement*)calloc(1, sizeof(singleParameterFunctionElement));
     tempSingleParameterFunctionBaseElement->ptr = tempSingleParameterFunctionElement;
     tempSingleParameterFunctionBaseElement->type = singleParameterFunctionElementType;
     tempSingleParameterFunctionElement->functionType = type;
@@ -938,8 +938,8 @@ baseElement *createSingleParameterFunctionElementAndFill(singleParameterFunction
 }
 baseElement *createDualParameterFunctionElement(dualParameterFunctionTypes type, bool isNegative)
 {
-    baseElement *tempDualParameterFunctionBaseElement = calloc(1, sizeof(baseElement));
-    dualParameterFunctionElement *tempDualParameterFunctionElement = calloc(1, sizeof(dualParameterFunctionElement));
+    baseElement *tempDualParameterFunctionBaseElement = (baseElement*)calloc(1, sizeof(baseElement));
+    dualParameterFunctionElement *tempDualParameterFunctionElement = (dualParameterFunctionElement*)calloc(1, sizeof(dualParameterFunctionElement));
     tempDualParameterFunctionBaseElement->ptr = tempDualParameterFunctionElement;
     tempDualParameterFunctionBaseElement->type = dualParameterFunctionElementType;
     tempDualParameterFunctionElement->functionType = type;
@@ -948,8 +948,8 @@ baseElement *createDualParameterFunctionElement(dualParameterFunctionTypes type,
 }
 baseElement *createDualParameterFunctionElementAndFill(dualParameterFunctionTypes type, bool isNegative, baseElement *firstParameter, baseElement *secondParameter)
 {
-    baseElement *tempDualParameterFunctionBaseElement = calloc(1, sizeof(baseElement));
-    dualParameterFunctionElement *tempDualParameterFunctionElement = calloc(1, sizeof(dualParameterFunctionElement));
+    baseElement *tempDualParameterFunctionBaseElement = (baseElement*)calloc(1, sizeof(baseElement));
+    dualParameterFunctionElement *tempDualParameterFunctionElement = (dualParameterFunctionElement*)calloc(1, sizeof(dualParameterFunctionElement));
     tempDualParameterFunctionBaseElement->ptr = tempDualParameterFunctionElement;
     tempDualParameterFunctionBaseElement->type = dualParameterFunctionElementType;
     tempDualParameterFunctionElement->functionType = type;
@@ -960,38 +960,38 @@ baseElement *createDualParameterFunctionElementAndFill(dualParameterFunctionType
 }
 baseElement *createMultipclationElement(int elementCount, bool isNegative)
 {
-    baseElement *tempMultipclationBaseElement = calloc(1, sizeof(baseElement));
-    multipclationElement *tempMultipclationElement = calloc(1, sizeof(multipclationElement));
+    baseElement *tempMultipclationBaseElement = (baseElement*)calloc(1, sizeof(baseElement));
+    multipclationElement *tempMultipclationElement = (multipclationElement*)calloc(1, sizeof(multipclationElement));
     tempMultipclationBaseElement->ptr = tempMultipclationElement;
     tempMultipclationBaseElement->type = multipclationElementType;
     tempMultipclationElement->elementCount = elementCount;
     tempMultipclationElement->isNegative = isNegative;
-    tempMultipclationElement->elementArray = calloc(elementCount, sizeof(baseElement *));
+    tempMultipclationElement->elementArray = (baseElement**)calloc(elementCount, sizeof(baseElement *));
     return tempMultipclationBaseElement;
 }
 baseElement *createParanthesesElement(int elementCount, bool isNegative)
 {
-    baseElement *tempParanthesesBaseElement = calloc(1, sizeof(baseElement));
-    paranthesesElement *tempParanthesesElement = calloc(1, sizeof(paranthesesElement));
+    baseElement *tempParanthesesBaseElement = (baseElement*)calloc(1, sizeof(baseElement));
+    paranthesesElement *tempParanthesesElement = (paranthesesElement*)calloc(1, sizeof(paranthesesElement));
     tempParanthesesBaseElement->ptr = tempParanthesesElement;
     tempParanthesesBaseElement->type = paranthesesElementType;
     tempParanthesesElement->elementCount = elementCount;
     tempParanthesesElement->isNegative = isNegative;
-    tempParanthesesElement->elementArray = calloc(elementCount, sizeof(baseElement *));
+    tempParanthesesElement->elementArray = (baseElement**)calloc(elementCount, sizeof(baseElement *));
     return tempParanthesesBaseElement;
 }
 baseElement *createMatrixElementWithAllElementsSetToZero(int n, int m)
 {
     int i,j;
-    baseElement *tempMatrixBaseElement = calloc(1, sizeof(baseElement));
-    matrixElement *tempMatrixElement = calloc(1, sizeof(matrixElement));
+    baseElement *tempMatrixBaseElement = (baseElement*)calloc(1, sizeof(baseElement));
+    matrixElement *tempMatrixElement = (matrixElement*)calloc(1, sizeof(matrixElement));
     tempMatrixBaseElement->ptr = tempMatrixElement;
     tempMatrixBaseElement->type = matrixElementType;
     tempMatrixElement->n = n;
     tempMatrixElement->m = m;
-    tempMatrixElement->elementMatrix = calloc(n, sizeof(baseElement **));
+    tempMatrixElement->elementMatrix = (baseElement***)calloc(n, sizeof(baseElement **));
     for(i=0;i<n;i++){
-        tempMatrixElement->elementMatrix[i] = calloc(m, sizeof(baseElement *));
+        tempMatrixElement->elementMatrix[i] = (baseElement**)calloc(m, sizeof(baseElement *));
         for(j=0;j<m;j++){
             tempMatrixElement->elementMatrix[i][j]=createConstantElement(0);
         }
@@ -1149,7 +1149,7 @@ void freeMemoryOfElement(baseElement *element)
 }
 char *substring(char *string, int start, int end)
 {
-    char *temp = calloc(end - start + 2, sizeof(char)); //+2 for \0 at the end
+    char *temp = (char*)calloc(end - start + 2, sizeof(char)); //+2 for \0 at the end
     memcpy(temp, string + start, end - start + 1);
     temp[end - start + 1] = '\0';
     return temp;
@@ -1164,7 +1164,7 @@ void printElement(baseElement *element)
     else if (element->type == polinominalElementType)
     {
         polinominalElement *temp = (polinominalElement *)element->ptr;
-        printf("%.2fx^%.2f", getValueOfElement(temp->coefficent, 0), getValueOfElement(temp->exp, 0));
+        printf("%.2f*x^%.2f", getValueOfElement(temp->coefficent, 0), getValueOfElement(temp->exp, 0));
     }
     else if (element->type == paranthesesElementType)
     {
@@ -1390,7 +1390,7 @@ double  numericalDerivative(baseElement *element,double x,double h,int mode)
 }
 baseElement* gregoryNewtonEnterpolation(baseElement *differencesTableMatrixBaseElement,double *xArray){
     int n,i,j;
-    matrixElement *differencesTableMatrix=differencesTableMatrixBaseElement->ptr;
+    matrixElement *differencesTableMatrix=(matrixElement*)differencesTableMatrixBaseElement->ptr;
     n=differencesTableMatrix->n;
     double h,input;
     for(j=1;j<n;j++){//how this is set up would allow me to acces nth differensial of xi by using [i][n]
@@ -1402,16 +1402,16 @@ baseElement* gregoryNewtonEnterpolation(baseElement *differencesTableMatrixBaseE
     printf("\n");
     h=xArray[1]-xArray[0];
     baseElement *elementBase=createParanthesesElement(n,false);//make a parantheses element to hold all the things
-    paranthesesElement *element=elementBase->ptr;
+    paranthesesElement *element=(paranthesesElement*)elementBase->ptr;
     for(i=0;i<n;i++){
         baseElement *mainMultipclationBaseElement=createMultipclationElement(3+i,false);
-        multipclationElement *mainMultipclationElement=mainMultipclationBaseElement->ptr;
+        multipclationElement *mainMultipclationElement=(multipclationElement*)mainMultipclationBaseElement->ptr;
         mainMultipclationElement->elementArray[0]=createConstantElement(getValueOfElement(differencesTableMatrix->elementMatrix[0][i],0));//delta^i f 0
         mainMultipclationElement->elementArray[1]=createConstantElement(1/pow(h,i));//1/h^i
         mainMultipclationElement->elementArray[2]=createConstantElement(1/((double)factorial(i)));//1/h^i
         for(j=0;j<i;j++){
             baseElement *xMinusXjBaseElement=createParanthesesElement(2,false);//multiply all the (x-xj)s
-            paranthesesElement *xMinusX=xMinusXjBaseElement->ptr;
+            paranthesesElement *xMinusX=(paranthesesElement*)xMinusXjBaseElement->ptr;
             xMinusX->elementArray[0]=createPolinominalElementAndFill(createConstantElement(1),createConstantElement(1));
             xMinusX->elementArray[1]=createConstantElement(-1*xArray[j]);
             mainMultipclationElement->elementArray[3+j]=xMinusXjBaseElement;
@@ -1431,9 +1431,9 @@ baseElement* gregoryNewtonEnterpolation(baseElement *differencesTableMatrixBaseE
 
 baseElement *findTheCofactorMatrix(baseElement *element){
     int i,j;
-    matrixElement *tempMainMatrix=element->ptr;
+    matrixElement *tempMainMatrix=(matrixElement*)element->ptr;
     baseElement *cofactorMatrixBaseElement=createMatrixElementWithAllElementsSetToZero(tempMainMatrix->n,tempMainMatrix->m),*tempSubMatrix;
-    matrixElement* tempCofactorMatrix=cofactorMatrixBaseElement->ptr;
+    matrixElement* tempCofactorMatrix=(matrixElement*)cofactorMatrixBaseElement->ptr;
     for(i=0;i<tempCofactorMatrix->n;i++){
         for(j=0;j<tempCofactorMatrix->m;j++){
             tempSubMatrix=getSubMatrix(element,i,j);
@@ -1445,9 +1445,9 @@ baseElement *findTheCofactorMatrix(baseElement *element){
 }
 baseElement* getSubMatrix(baseElement* matrix,int iEliminate,int jEliminate){
     int iSub=0,iMain=0,jSub=0,jMain=0;
-    matrixElement *temp=matrix->ptr;
+    matrixElement *temp=(matrixElement*)matrix->ptr;
     baseElement *subMatrixBaseElement= createMatrixElementWithAllElementsSetToZero(temp->n-1,temp->m-1);//make a new sub matrix that is smaller by 1 on each axis
-    matrixElement *subMatrix=subMatrixBaseElement->ptr;
+    matrixElement *subMatrix=(matrixElement*)subMatrixBaseElement->ptr;
     for(iMain=0;iMain<temp->n;iMain++){
         if(iMain!=iEliminate){
             for(jMain=0;jMain<temp->m;jMain++){
@@ -1464,7 +1464,7 @@ baseElement* getSubMatrix(baseElement* matrix,int iEliminate,int jEliminate){
 }
 double findDeterminentOfMatrix(baseElement *element){
     if(element->type!=matrixElementType)return getValueOfElement(element,0);//act as if it was a 1x1 matrix
-    matrixElement *temp=element->ptr;
+    matrixElement *temp=(matrixElement*)element->ptr;
     if(temp->m==1&&temp->n==1)return getValueOfElement(temp->elementMatrix[0][0],0);
     if(temp->m==2&&temp->n==2)return getValueOfElement(temp->elementMatrix[0][0],0)*getValueOfElement(temp->elementMatrix[1][1],0)-getValueOfElement(temp->elementMatrix[1][0],0)*getValueOfElement(temp->elementMatrix[0][1],0);//return the value if its 2x2
     int iDet;
@@ -1479,7 +1479,7 @@ double findDeterminentOfMatrix(baseElement *element){
 baseElement* readAndCreateMatrix(int n,int m){//this could be improved to read variables into the matrix like e^x
     int i,j;
     baseElement *matrixBaseElement=createMatrixElementWithAllElementsSetToZero(n,m);
-    matrixElement *element=matrixBaseElement->ptr;
+    matrixElement *element=(matrixElement*)matrixBaseElement->ptr;
     for(i=0;i<n;i++){
         for(j=0;j<m;j++){
             scanf("%lf",(double*)element->elementMatrix[i][j]->ptr);
@@ -1488,9 +1488,9 @@ baseElement* readAndCreateMatrix(int n,int m){//this could be improved to read v
     return matrixBaseElement;
 }
 baseElement* getTranspose(baseElement *matrix){
-    matrixElement *tempMatrix=matrix->ptr;
+    matrixElement *tempMatrix=(matrixElement*)matrix->ptr;
     baseElement *transposeMatrixBaseElement=createMatrixElementWithAllElementsSetToZero(tempMatrix->m,tempMatrix->n);
-    matrixElement *tempTransposeMatrix=transposeMatrixBaseElement->ptr;
+    matrixElement *tempTransposeMatrix=(matrixElement*)transposeMatrixBaseElement->ptr;
     int i=0,j=0;
     for(i=0;i<tempTransposeMatrix->n;i++){
         for(j=0;j<tempTransposeMatrix->m;j++){
@@ -1507,7 +1507,7 @@ baseElement* getInverseOFAMatrix(baseElement *matrix)
     printElement(matrix);
     printElement(cofactor);
     baseElement *transposeBaseElement=getTranspose(cofactor);
-    matrixElement *transposeTemp=transposeBaseElement->ptr;
+    matrixElement *transposeTemp=(matrixElement*)transposeBaseElement->ptr;
     
     int i;
     for(i=0;i<transposeTemp->n;i++){
@@ -1518,33 +1518,33 @@ baseElement* getInverseOFAMatrix(baseElement *matrix)
     return transposeBaseElement;
 }
 void addARowToAnother(baseElement *matrixBase,int source,int dest,double coefficent){
-    matrixElement *matrix=matrixBase->ptr;
+    matrixElement *matrix=(matrixElement*)matrixBase->ptr;
     int j=0;
     for(j=0;j<matrix->m;j++){
         setValueOfConstantElement(matrix->elementMatrix[dest][j],getValueOfElement(matrix->elementMatrix[dest][j],0)+getValueOfElement(matrix->elementMatrix[source][j],0)*coefficent);
     }
 }
 void multiplyARowWithAConstant(baseElement *matrixBase,int row,double coefficent){
-    matrixElement *matrix=matrixBase->ptr;
+    matrixElement *matrix=(matrixElement*)matrixBase->ptr;
     int j=0;
     for(j=0;j<matrix->m;j++){
         setValueOfConstantElement(matrix->elementMatrix[row][j],getValueOfElement(matrix->elementMatrix[row][j],0)*coefficent);
     }
 }
 void swapRows(baseElement *matrixBase, int firstRow,int secondRow){
-    matrixElement *matrix=matrixBase->ptr;
+    matrixElement *matrix=(matrixElement*)matrixBase->ptr;
     baseElement **temp=matrix->elementMatrix[firstRow];
     matrix->elementMatrix[firstRow]=matrix->elementMatrix[secondRow];
     matrix->elementMatrix[secondRow]=temp;
 }
 baseElement* gaussEliminationMethod(baseElement *matrixBase){
     int n,m,i,j;
-    matrixElement *matrix=matrixBase->ptr;
+    matrixElement *matrix=(matrixElement*)matrixBase->ptr;
     n=matrix->n;
     m=matrix->m;
     double tempCofactor,tempAnchorValue;
     baseElement *inverseMatrixBase=createMatrixElementWithAllElementsSetToZero(n,m);//instead of making the matrix bigger make a difference matrix for inverse since it is easier that way
-    matrixElement *inverseMatrix=inverseMatrixBase->ptr;
+    matrixElement *inverseMatrix=(matrixElement*)inverseMatrixBase->ptr;
     
     for(i=0;i<n;i++)setValueOfConstantElement(inverseMatrix->elementMatrix[i][i],1);
     for(i=0;i<n;i++){
@@ -1570,7 +1570,7 @@ void GaussSeidelIterationMethod(baseElement *coefficentMatrixBase,baseElement *c
     int n,m,i,j,iterationNumber=0,k;
     double tempCofactor,tempAnchorValue,sum;
     bool isFinished=false;
-    matrixElement *constantMatrix=constantMatrixBase->ptr,*coefficentMatrix=coefficentMatrixBase->ptr;
+    matrixElement *constantMatrix=(matrixElement*)constantMatrixBase->ptr,*coefficentMatrix=(matrixElement*)coefficentMatrixBase->ptr;
     n=coefficentMatrix->n;
     m=coefficentMatrix->m;
     double max=0;
