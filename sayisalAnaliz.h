@@ -1,8 +1,8 @@
 
 #include <stdbool.h>
 
-#define pi 3.14159265359
-#define e 2.718281828459045
+#define piConstant 3.14159265359
+#define eConstant 2.718281828459045
 typedef enum elementType{
 constantElementType,multipclationElementType,polinominalElementType,paranthesesElementType,exponentialElementType,singleParameterFunctionElementType,dualParameterFunctionElementType,matrixElementType
 } elementType;

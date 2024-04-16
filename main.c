@@ -5,14 +5,15 @@
 #include"sayisalAnaliz.h"
 
 int main(){
-    baseElement *derivitive,*function;//=malloc(sizeof(baseElement)),*derivitive;
+    baseElement *derivitive=NULL,*function=NULL;//=malloc(sizeof(baseElement)),*derivitive;
     int c=0,mode;
     double x=0;
     //gregoryNewtonEnterpolation();
     while(true){
-        printf("Istediginiz yontemi secin\n1: Bisection yontemi\n2: Regula-falsi\n3: Newton-Rapshon yontemi\n4: NxNlik bir matrisin tersi\n5: Gauus Eleminasyon\n6: Gauss Seidal yontemleri\n7: Sayisal Turev (merkezi, ileri ve geri farklar opsiyonlu)\n8: Simpson yontemi\n9: Trapez yontemi\n10: Degisken dnusumsuz Gregory newton Enterpolasyonu\n11: Analitik turev\n12: Fonksiyonun x deki degeri\n");
+        printf("Istediginiz yontemi secin\n0: Cikis\n1: Bisection yontemi\n2: Regula-falsi\n3: Newton-Rapshon yontemi\n4: NxNlik bir matrisin tersi\n5: Gauus Eleminasyon\n6: Gauss Seidal yontemleri\n7: Sayisal Turev (merkezi, ileri ve geri farklar opsiyonlu)\n8: Simpson yontemi\n9: Trapez yontemi\n10: Degisken dnusumsuz Gregory newton Enterpolasyonu\n11: Analitik turev\n12: Fonksiyonun x deki degeri\n");
         scanf("%d",&mode);
-        if(mode==1){
+        if(mode==0)return 0;
+        else if(mode==1){
             
             double aStart, bStart,ep;
             baseElement *element=readFunction();

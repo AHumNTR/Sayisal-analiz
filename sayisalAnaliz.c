@@ -92,6 +92,18 @@ bool checkAndConvertToConstantElement(char *elementString, baseElement *constant
     else if (elementString[0] != '+')
         hasSign = false;
     i = hasSign;
+    if(!strncmp(elementString+hasSign,"e\0",2)||!strncmp(elementString+hasSign,"e\n",2)){
+        *temp=(isNegative ? -1:1)*eConstant;
+        constant->type = constantElementType;
+        constant->ptr = temp;
+        return true;
+    }
+    if(!strncmp(elementString+hasSign,"pi\0",3)||!strncmp(elementString+hasSign,"pi\n",3)){
+        *temp=(isNegative ? -1:1)*piConstant;
+        constant->type = constantElementType;
+        constant->ptr = temp;
+        return true;
+    }
     while (elementString[i] != '\0')
     {
         if (elementString[i] == '.')
@@ -503,7 +515,8 @@ double getValueOfElement(baseElement *element, double x)
     else if (element->type == exponentialElementType)
     {
         exponentialElement *temp = (exponentialElement *)element->ptr;
-        // printf("exp %lf\n",pow(getValueOfElement(temp->element,x),getValueOfElement(temp->exp,x)));
+        printf("element value=%lf\nexp value=%lf\n",getValueOfElement(temp->element,x),getValueOfElement(temp->exp,x));
+         printf("exp %lf\n",pow(getValueOfElement(temp->element,x),getValueOfElement(temp->exp,x)));
         return (temp->isNegative ? -1 : 1) * pow(getValueOfElement(temp->element, x), getValueOfElement(temp->exp, x));
     }
     else if (element->type == singleParameterFunctionElementType)
@@ -552,7 +565,7 @@ double getValueOfElement(baseElement *element, double x)
             temp1 = getValueOfElement(temp->parameter, x);
             if (temp1 < 0)
                 printf("ln parameter out of range using absolute instead\n");
-            value = log(fabs(getValueOfElement(temp->parameter, x))) / log(e);
+            value = log(fabs(getValueOfElement(temp->parameter, x))) / log(eConstant);
             break;
 
         default:
@@ -1352,7 +1365,7 @@ double Simpson(baseElement *element,double xSStart,double xEStart,double h,int m
     {
         for (i = 1; i < (xE - xS) / h; i++)
         {
-            sum = sum + 2 * (h / 3) * getValueOfElement(element, xS + h * i) * (2 - i % 2); // multiply by 2 if odd and by 4 if even
+            sum = sum + 2 * (h / 3) * getValueOfElement(element, xS + h * i) * (1 + i % 2); // multiply by 4 if odd and by 2 if even
         }
         sum = sum + (getValueOfElement(element, xS) + getValueOfElement(element, xE)) * h / 3;
     }
