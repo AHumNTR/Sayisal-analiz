@@ -122,4 +122,5 @@ void multiplyARowWithAConstant(baseElement *matrixBase,int row,double coefficent
 void addARowToAnother(baseElement *matrixBase,int source,int dest,double coefficent);
 
 baseElement* gaussEliminationMethod(baseElement *matrixBase);
+void gaussEliminationLinearEquationsMethod(baseElement *coefficentMatrixBase,baseElement *constantsMatrixBase);
 void GaussSeidelIterationMethod(baseElement *coefficentMatrixBase,baseElement *constantMatrixBase,double *xValues,double epsilon);

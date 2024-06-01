@@ -341,8 +341,7 @@ bool checkAndConvertToExponentialElement(char *input, baseElement *expElementBas
         expElement->isNegative = true;
         convertElementIntoTypes(elementsString[0] + 1, base);
     }
-    else
-        convertElementIntoTypes(elementsString[0], base); // maybe i should make it work for more then one exponential but then syntax gets unpredictable imo
+    else convertElementIntoTypes(elementsString[0], base); // maybe i should make it work for more then one exponential but then syntax gets unpredictable imo
     convertElementIntoTypes(elementsString[1] + 1, exp);
     expElementBase->type = exponentialElementType;
     expElementBase->ptr = expElement;
@@ -515,8 +514,8 @@ double getValueOfElement(baseElement *element, double x)
     else if (element->type == exponentialElementType)
     {
         exponentialElement *temp = (exponentialElement *)element->ptr;
-        printf("element value=%lf\nexp value=%lf\n",getValueOfElement(temp->element,x),getValueOfElement(temp->exp,x));
-         printf("exp %lf\n",pow(getValueOfElement(temp->element,x),getValueOfElement(temp->exp,x)));
+        //printf("element value=%lf\nexp value=%lf\n",getValueOfElement(temp->element,x),getValueOfElement(temp->exp,x));
+         //printf("exp %lf\n",pow(getValueOfElement(temp->element,x),getValueOfElement(temp->exp,x)));
         return (temp->isNegative ? -1 : 1) * pow(getValueOfElement(temp->element, x), getValueOfElement(temp->exp, x));
     }
     else if (element->type == singleParameterFunctionElementType)
@@ -564,7 +563,7 @@ double getValueOfElement(baseElement *element, double x)
         case lnT:
             temp1 = getValueOfElement(temp->parameter, x);
             if (temp1 < 0)
-                printf("ln parameter out of range using absolute instead\n");
+                printf("ln parametresi tanim araligi disinda degiskenin mutlak degeri alinip islem yapilacak (buyuk ihtimalle hatali olucak)\n");
             value = log(fabs(getValueOfElement(temp->parameter, x))) / log(eConstant);
             break;
 
@@ -581,14 +580,11 @@ double getValueOfElement(baseElement *element, double x)
         dualParameterFunctionElement *temp = (dualParameterFunctionElement*)element->ptr;
         double value;
         // printf("entering log\n");
-        switch (temp->functionType)
-        {
-        case logT:
+        if(temp->functionType==logT){
             double temp1 = getValueOfElement(temp->secondParameter, x), temp2 = getValueOfElement(temp->firstParameter, x);
             if (temp1 < 0 || temp2 < 0 || temp2 == 1)
-                printf("Error log parameters are out of scope");
+                printf("log parametresi tanim araligi disinda degiskenin mutlak degeri alinip islem yapilacak (buyuk ihtimalle hatali olucak)\n");
             value = (temp->isNegative ? -1 : 1) * log(temp1) / log(temp2);
-            break;
         }
         // printf("func 2 %lf\n",value);
         return value;
@@ -663,8 +659,6 @@ baseElement *derivate(baseElement *element)
         mainParanthesesElement->elementArray[0] = gtLnFBaseElement;
         mainParanthesesElement->elementArray[1] = ftGdivFxBaseElement;
 
-        derivitive->type = multipclationElementType;
-        derivitive->ptr = mainMultipclationElement;
         free(tempBase);
         return derivitive;
     }
@@ -675,7 +669,7 @@ baseElement *derivate(baseElement *element)
         baseElement *derivitive;
         if (temp->functionType == sinT)
         {
-            derivitive = createMultipclationElement(2, false);
+            derivitive = createMultipclationElement(2, temp->isNegative);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createSingleParameterFunctionElementAndFill(cosT, false, temp->parameter);
@@ -683,7 +677,7 @@ baseElement *derivate(baseElement *element)
         }
         else if (temp->functionType == cosT)
         {
-            derivitive = createMultipclationElement(2, false);
+            derivitive = createMultipclationElement(2, temp->isNegative);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createSingleParameterFunctionElementAndFill(sinT, true, temp->parameter);
@@ -691,7 +685,7 @@ baseElement *derivate(baseElement *element)
         }
         else if (temp->functionType == tanT)
         {
-            derivitive = createMultipclationElement(2, false);
+            derivitive = createMultipclationElement(2, temp->isNegative);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createExponentialElementAndFill(false, createSingleParameterFunctionElementAndFill(secT, false, temp->parameter), createConstantElement(2));
@@ -699,7 +693,7 @@ baseElement *derivate(baseElement *element)
         }
         else if (temp->functionType == cotT)
         {
-            derivitive = createMultipclationElement(2, false);
+            derivitive = createMultipclationElement(2, temp->isNegative);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createExponentialElementAndFill(false, createSingleParameterFunctionElementAndFill(cosecT, true, temp->parameter), createConstantElement(-2));
@@ -707,7 +701,7 @@ baseElement *derivate(baseElement *element)
         }
         else if (temp->functionType == secT)
         {
-            derivitive = createMultipclationElement(3, false);
+            derivitive = createMultipclationElement(3, temp->isNegative);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createSingleParameterFunctionElementAndFill(tanT, false, temp->parameter);
@@ -716,7 +710,7 @@ baseElement *derivate(baseElement *element)
         }
         else if (temp->functionType == cosecT)
         {
-            derivitive = createMultipclationElement(3, false);
+            derivitive = createMultipclationElement(3, temp->isNegative);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createSingleParameterFunctionElementAndFill(cotT, true, temp->parameter);
@@ -725,7 +719,7 @@ baseElement *derivate(baseElement *element)
         }
         else if (temp->functionType == arcsinT)
         {
-            derivitive = createMultipclationElement(2, false);
+            derivitive = createMultipclationElement(2, temp->isNegative);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
 
@@ -740,7 +734,7 @@ baseElement *derivate(baseElement *element)
         }
         else if (temp->functionType == arccosT)
         {
-            derivitive = createMultipclationElement(2, true);
+            derivitive = createMultipclationElement(2, !temp->isNegative);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
 
@@ -755,7 +749,7 @@ baseElement *derivate(baseElement *element)
         }
         else if (temp->functionType == arctanT)
         {
-            derivitive = createMultipclationElement(2, false);
+            derivitive = createMultipclationElement(2, temp->isNegative);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
 
@@ -770,7 +764,7 @@ baseElement *derivate(baseElement *element)
         }
         else if (temp->functionType == arccotT)
         {
-            derivitive = createMultipclationElement(2, true);
+            derivitive = createMultipclationElement(2, !temp->isNegative);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
 
@@ -785,7 +779,7 @@ baseElement *derivate(baseElement *element)
         }
         else if (temp->functionType == arcsecT)
         {
-            derivitive = createMultipclationElement(3, false);
+            derivitive = createMultipclationElement(3, temp->isNegative);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createExponentialElementAndFill(false, temp->parameter, createConstantElement(-1));
@@ -801,7 +795,7 @@ baseElement *derivate(baseElement *element)
         }
         else if (temp->functionType == arccosecT)
         {
-            derivitive = createMultipclationElement(3, true);
+            derivitive = createMultipclationElement(3, !temp->isNegative);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createExponentialElementAndFill(false, temp->parameter, createConstantElement(-1));
@@ -817,7 +811,7 @@ baseElement *derivate(baseElement *element)
         }
         else if (temp->functionType == lnT)
         { // d/dx(ln(f(x))=ft/f
-            derivitive = createMultipclationElement(2, false);
+            derivitive = createMultipclationElement(2, temp->isNegative);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr;
             tempMultipclationElement->elementArray[0] = derivate(temp->parameter);
             tempMultipclationElement->elementArray[1] = createExponentialElementAndFill(false, temp->parameter, createConstantElement(-1));
@@ -831,18 +825,18 @@ baseElement *derivate(baseElement *element)
         dualParameterFunctionElement *temp = (dualParameterFunctionElement*)tempBase->ptr;
         if (temp->functionType == logT)
         { // d/dx(log_fx(g(x))=(gt*lnf/g-fd*lng/f)/((lnf)^2)
-            baseElement *derivitive = createMultipclationElement(2, false);
-            baseElement *mainParanthesesBaseElement = createParanthesesElement(2, false), *gtLnFDivGBaseElement = createMultipclationElement(3, false), *fdLnGdivFBaseElement = createMultipclationElement(3, false);
+            baseElement *derivitive = createMultipclationElement(2, temp->isNegative);
+            baseElement *mainParanthesesBaseElement = createParanthesesElement(2, false), *gtLnFDivGBaseElement = createMultipclationElement(3, false), *fdLnGdivFBaseElement = createMultipclationElement(3, true);
             multipclationElement *tempMultipclationElement = (multipclationElement*)derivitive->ptr, *gtLnFDivG = (multipclationElement*)gtLnFDivGBaseElement->ptr, *fdLnGdivF = (multipclationElement*)fdLnGdivFBaseElement->ptr;
-            tempMultipclationElement->elementArray[0] = createExponentialElementAndFill(false, createSingleParameterFunctionElementAndFill(lnT, false, temp->firstParameter), createConstantElement(-2)); // =/((lnf)^2)
+            tempMultipclationElement->elementArray[0] = createExponentialElementAndFill(false, createSingleParameterFunctionElementAndFill(lnT, false, makeCopyOfElement(temp->firstParameter)), createConstantElement(-2)); // =/((lnf)^2)
             tempMultipclationElement->elementArray[1] = mainParanthesesBaseElement;
             paranthesesElement *mainParanthesesElement = (paranthesesElement*)mainParanthesesBaseElement->ptr; // set the main parantheses
             mainParanthesesElement->elementArray[0] = gtLnFDivGBaseElement;
             mainParanthesesElement->elementArray[1] = fdLnGdivFBaseElement;
 
             gtLnFDivG->elementArray[0] = derivate(temp->secondParameter);
-            gtLnFDivG->elementArray[1] = createSingleParameterFunctionElementAndFill(lnT, false, temp->firstParameter);
-            gtLnFDivG->elementArray[2] = createExponentialElementAndFill(false, temp->secondParameter, createConstantElement(-1));
+            gtLnFDivG->elementArray[1] = createSingleParameterFunctionElementAndFill(lnT, false, makeCopyOfElement(temp->firstParameter));
+            gtLnFDivG->elementArray[2] = createExponentialElementAndFill(false, makeCopyOfElement(temp->secondParameter), createConstantElement(-1));
 
             fdLnGdivF->elementArray[0] = derivate(temp->firstParameter);
             fdLnGdivF->elementArray[1] = createSingleParameterFunctionElementAndFill(lnT, false, temp->secondParameter);
@@ -1276,7 +1270,7 @@ double BisectionSearch(baseElement *element,double aStart,double bStart,double e
     {
         while (fabs(getValueOfElement(element, a)) - ep > 0 && fabs(getValueOfElement(element, b)) - ep > 0)
         {
-            printf("iteration %d\na=%lf f(a)=%lf\nb=%lf f(b)=%lf\n", i, a, getValueOfElement(element, a), b, getValueOfElement(element, b));
+            printf("iterasyon %d\na=%lf f(a)=%lf\nb=%lf f(b)=%lf\n", i, a, getValueOfElement(element, a), b, getValueOfElement(element, b));
             if (getValueOfElement(element, (a + b) / 2) > 0)
                 b = (a + b) / 2;
             else
@@ -1288,7 +1282,7 @@ double BisectionSearch(baseElement *element,double aStart,double bStart,double e
     {
         while (fabs(getValueOfElement(element, a)) - ep > 0 && fabs(getValueOfElement(element, b)) - ep > 0)
         {
-            printf("iteration %d\na=%lf f(a)=%lf\nb=%lf f(b)=%lf\n", i, a, getValueOfElement(element, a), b, getValueOfElement(element, b));
+            printf("iterasyon %d\na=%lf f(a)=%lf\nb=%lf f(b)=%lf\n", i, a, getValueOfElement(element, a), b, getValueOfElement(element, b));
             if (getValueOfElement(element, (a + b) / 2) > 0)
                 a = (a + b) / 2;
             else
@@ -1297,9 +1291,10 @@ double BisectionSearch(baseElement *element,double aStart,double bStart,double e
         }
     }
     else printf("Arada bulunabilecek bir kok yoktur\n");
-    printf("iteration %d\na=%lf f(a)=%lf\nb=%lf f(b)=%lf\n", i, a, getValueOfElement(element, a), b, getValueOfElement(element, b));
+    printf("iterasyon %d\na=%lf f(a)=%lf\nb=%lf f(b)=%lf\n", i, a, getValueOfElement(element, a), b, getValueOfElement(element, b));
     return a;
 }
+
 double RegulaFalsi(baseElement *element,double xcStart,double xpStart,double ep)
 {
     double xc=xcStart, xp=xpStart, temp; // x current and x previous
@@ -1310,7 +1305,7 @@ double RegulaFalsi(baseElement *element,double xcStart,double xpStart,double ep)
     fxp = getValueOfElement(element, xp);
     while (fabs(fxc) - ep > 0)
     {
-        printf("iteration %d\ncurrent x=%lf current f(x)=%lf\nprevious x=%lf previous f(x)=%lf\n\n", i, xc, fxc, xp, fxp);
+        printf("iterasyon %d\nsuanki x=%lf suanki f(x)=%lf\nonceki x=%lf onceki f(x)=%lf\n\n", i, xc, fxc, xp, fxp);
         temp = xc;
         xc = xc - ((fxc * (xp - xc)) / (fxp - fxc));
         xp = temp;
@@ -1318,7 +1313,7 @@ double RegulaFalsi(baseElement *element,double xcStart,double xpStart,double ep)
         fxp = getValueOfElement(element, xp);
         i++;
     }
-    printf("iteration %d\ncurrent x=%lf current f(x)=%lf\nprevious x=%lf previous f(x)=%lf\n", i, xc, fxc, xp, fxp);
+    printf("iterasyon %d\nsuanki x=%lf suanki f(x)=%lf\nonceki x=%lf onceki f(x)=%lf\n", i, xc, fxc, xp, fxp);
     return xc;
 }
 double NewtonRaphson(baseElement *element,double xStart,double ep)
@@ -1332,16 +1327,31 @@ double NewtonRaphson(baseElement *element,double xStart,double ep)
     //printf("epsilon degerini girin\n");
     //scanf("%lf", &ep);
     fx = getValueOfElement(element, x);
-    fdx = getValueOfElement(derivative, x);
+    fdx = getValueOfElement(derivative, x);//not checking the first iteration might be an issue but since we only need to get out of the loop if its broken it should be fine
+    printf("Fonksiyonun analitik turevi:");
+    printElement(derivative);
+    printf("\n");
     while (fabs(fx) - ep > 0)
     {
-        printf("iteration %d\ncurrent x=%lf current f(x)=%lf\nprevious x=%lf previous f(x)=%lf\n\n", i, x, fx);
+        printf("iterasyon %d\nsuanki x=%lf suanki f(x)=%lf df(x)/dx=%lf\n\n\n", i, x, fx,fdx);
         x = x - fx / fdx;
         fx = getValueOfElement(element, x);
         fdx = getValueOfElement(derivative, x);
+        if(fdx==INFINITY||fdx==-INFINITY){
+            printf("turevin degeri sonsuz oldugundan algoritmadan cikiliyor");
+            return 0;
+        }
+        else if(fdx==0){
+            printf("turevin degeri 0 oldugundan algoritmadan cikiliyor");
+            return 0;
+        }
+        else if(fx==INFINITY||fx==-INFINITY){
+            printf("fonksiyonun degeri sonsuz oldugundan algoritmadan cikiliyor");
+            return 0;
+        }
         i++;
     }
-    printf("iteration %d\ncurrent x=%lf current f(x)=%lf\nprevious x=%lf previous f(x)=%lf\n", i, x, fx);
+    printf("iterasyon %d\nsuanki x=%lf suanki f(x)=%lf\n\n", i, x, fx);
     freeMemoryOfElement(derivative);
     return x;
 }
@@ -1431,9 +1441,9 @@ baseElement* gregoryNewtonEnterpolation(baseElement *differencesTableMatrixBaseE
         }
         element->elementArray[i]=mainMultipclationBaseElement;
     }
-    printf("Interpolated function is= ");
+    printf("Enterpole edilmis fonksiyon = ");
     printElement(elementBase);
-    printf("\nPlease select an x value to test write -1 to exit\n");
+    printf("\nDenemek istediginiz x degerini girin cikmak icin -1 yazin\n");
     while (input!=-1)
     {
         scanf("%lf",&input);
@@ -1517,17 +1527,19 @@ baseElement* getInverseOFAMatrix(baseElement *matrix)
     double det=findDeterminentOfMatrix(matrix);
     if(det==0)return NULL;
     baseElement *cofactor=findTheCofactorMatrix(matrix);
-    printElement(matrix);
+    printf("Cofactor matrisi\n");
     printElement(cofactor);
     baseElement *transposeBaseElement=getTranspose(cofactor);
     matrixElement *transposeTemp=(matrixElement*)transposeBaseElement->ptr;
     
+    printf("Cofactor matrisinin transpozu\n");
+    printElement(transposeBaseElement);
+    printf("Matrisin determinanti= %lf\n",det);
     int i;
     for(i=0;i<transposeTemp->n;i++){
         multiplyARowWithAConstant(transposeBaseElement,i,1/det);
     }
     freeMemoryOfElement(cofactor);
-    printElement(transposeBaseElement);
     return transposeBaseElement;
 }
 void addARowToAnother(baseElement *matrixBase,int source,int dest,double coefficent){
@@ -1579,8 +1591,34 @@ baseElement* gaussEliminationMethod(baseElement *matrixBase){
     }
     return inverseMatrixBase;
 }
+void gaussEliminationLinearEquationsMethod(baseElement *coefficentMatrixBase,baseElement *constantsMatrixBase){
+    int n,m,i,j;
+    matrixElement *coefficentMatrix=(matrixElement*)coefficentMatrixBase->ptr;
+    n=coefficentMatrix->n;
+    m=coefficentMatrix->m;
+    double tempCofactor,tempAnchorValue;
+    matrixElement *constantMatrix=(matrixElement*)constantsMatrixBase->ptr;
+    
+    for(i=0;i<n;i++){
+        tempCofactor=1/getValueOfElement(coefficentMatrix->elementMatrix[i][i],0);//after multiplying the value changes so i have to use some temp values
+        multiplyARowWithAConstant(coefficentMatrixBase,i,tempCofactor);
+        multiplyARowWithAConstant(constantsMatrixBase,i,tempCofactor);
+        for(j=0;j<m;j++){
+            if(j!=i) {
+                tempAnchorValue=-1*getValueOfElement(coefficentMatrix->elementMatrix[j][i],0);//same thing with the anchor value
+                addARowToAnother(coefficentMatrixBase,i,j,tempAnchorValue);
+                addARowToAnother(constantsMatrixBase,i,j,tempAnchorValue);
+            }
+            
+        }
+        printElement(coefficentMatrixBase);
+        printf("\n");
+        printElement(constantsMatrixBase);
+        printf("\n");
+    }
+}
 void GaussSeidelIterationMethod(baseElement *coefficentMatrixBase,baseElement *constantMatrixBase,double *xValues,double epsilon){
-    int n,m,i,j,iterationNumber=0,k;
+    int n,m,i,j,iterationNumber=0,k=0;
     double tempCofactor,tempAnchorValue,sum;
     bool isFinished=false;
     matrixElement *constantMatrix=(matrixElement*)constantMatrixBase->ptr,*coefficentMatrix=(matrixElement*)coefficentMatrixBase->ptr;
@@ -1590,15 +1628,15 @@ void GaussSeidelIterationMethod(baseElement *coefficentMatrixBase,baseElement *c
     int maxIndex=0;
     int alreadySwapped[n];
     for(i=0;i<n;i++)alreadySwapped[i]=-1;
-    for(j=0;j<n;j++){//make the diagonal multipclation the biggest it can be this algorithm isnt done yet diagonaldaki o satirin en buyuku olcak bu algoritma komple yanlis
-        for(i=0;i<m;i++){
-            if(fabs(getValueOfElement(coefficentMatrix->elementMatrix[i][j],0))>max)
+    for(j=0;j<n;j++){//make it diagonally dominant also its n for both cause you dont want to consider any column past n cause they will act like constants anyways 
+        for(i=0;i<n;i++){
+            if(fabs(getValueOfElement(coefficentMatrix->elementMatrix[i][j],0))>max&&fabs(getValueOfElement(coefficentMatrix->elementMatrix[i][j],0))>alreadySwapped[i])
             {
                 max=fabs(getValueOfElement(coefficentMatrix->elementMatrix[i][j],0));
                 maxIndex=i;
             }
         }
-        if(alreadySwapped[maxIndex]==-1){
+        if(alreadySwapped[maxIndex]==-1&&max>=0){
             alreadySwapped[j]=max;
             swapRows(coefficentMatrixBase,j,maxIndex);
             swapRows(constantMatrixBase,j,maxIndex);
@@ -1609,12 +1647,15 @@ void GaussSeidelIterationMethod(baseElement *coefficentMatrixBase,baseElement *c
                 swapRows(coefficentMatrixBase,j,maxIndex);
                 swapRows(constantMatrixBase,j,maxIndex);
             }
-           printf("Matris kosegence baskin hale getirilemiyor dogru sonuc vermeyebilir menuye donmek icin 0 devam etmek icin 1 yazin\n"); 
-           k=getchar();
-           if(k==0)return;
+            if(k==0){
+                printf("Matris kosegence baskin hale getirilemiyor dogru sonuc vermeyebilir menuye donmek icin 0 devam etmek icin 1 yazin\n"); 
+                while ((k = getchar()) != '\n' && k != EOF);
+                k=getchar();
+                if(k=='0')return;
+            }
         }
         
-        max=0;
+        max=-1;
     }
    printElement(coefficentMatrixBase);
     while(!isFinished){

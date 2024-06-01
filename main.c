@@ -66,16 +66,33 @@ int main(){
             }
         }
         else if(mode==5){
-            int n;
-            printf("Matrisin n degerini girin\n");
-            scanf("%d",&n);
-            printf("Matrisi girin\n");
-            baseElement *matrix=readAndCreateMatrix(n,n);
-            baseElement *inverseMatrix=gaussEliminationMethod(matrix);
-            printf("Matrisin tersi: \n");
-            printElement(inverseMatrix);
-            freeMemoryOfElement(matrix);
-            freeMemoryOfElement(inverseMatrix);
+            int n,mode;
+            printf("Matrisin tersini almak icin 1 lineer denklem sistemi cozmek icin 2 girin\n");
+            scanf("%d",&mode);
+            if(mode==1){
+                printf("Matrisin n degerini girin\n");
+                scanf("%d",&n);
+                printf("Matrisi girin\n");
+                baseElement *matrix=readAndCreateMatrix(n,n);
+                baseElement *inverseMatrix=gaussEliminationMethod(matrix);
+                printf("Matrisin tersi: \n");
+                printElement(inverseMatrix);
+                freeMemoryOfElement(matrix);
+                freeMemoryOfElement(inverseMatrix);
+            }
+            if(mode==2){
+                printf("Katsayilar Matrisinin n degerini girin\n");
+                scanf("%d",&n);
+                printf("Katsayilar matrisini girin\n");
+                baseElement *coefficentMatrix=readAndCreateMatrix(n,n);
+                printf("Sabitler matrisini girin\n");
+                baseElement *constantMatrix=readAndCreateMatrix(n,1);
+                gaussEliminationLinearEquationsMethod(coefficentMatrix,constantMatrix);
+                printf("Denklem sisteminin cozumu: \n");
+                printElement(constantMatrix);
+                freeMemoryOfElement(coefficentMatrix);
+                freeMemoryOfElement(constantMatrix);
+            }
             
         }
         else if(mode==6){
@@ -88,10 +105,10 @@ int main(){
             printf("Matrisi girin\n");
             baseElement *coefficentMatrixBase=readAndCreateMatrix(n,m);
             printf("Sabit sayilar matrisini girin\n");
-            baseElement *constantsMatrixBase=readAndCreateMatrix(m,1);
+            baseElement *constantsMatrixBase=readAndCreateMatrix(n,1);
             double *xValues=(double*)calloc(m,sizeof(double));
             printf("Degiskenlerin baslangic degerlerini girin\n");
-            for(i=0;i<n;i++)scanf("%lf",xValues+i);
+            for(i=0;i<m;i++)scanf("%lf",xValues+i);
             GaussSeidelIterationMethod(coefficentMatrixBase,constantsMatrixBase,xValues,epsilon);
         }
         else if(mode==7){
